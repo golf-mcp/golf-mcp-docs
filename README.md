@@ -1,110 +1,147 @@
-# Authed
+# 🔐 Authed
 
-OAuth for AI agents. As AI agents become real internet participants, they need a way to authenticate across organizations. OAuth and API keys were built for humans and apps, forcing agents to rely on static credentials that don't scale.
+<div align="center">
 
-Authed is a developer-first, open-source protocol that gives agents their own ID, allowing them to securely authenticate with each other - across different ecosystems - without static keys or manual approvals. Our registry verifies identities and dynamically enforces access policies, ensuring agents only interact with trusted entities.
+[![PyPI version](https://badge.fury.io/py/agent-auth.svg)](https://badge.fury.io/py/agent-auth)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com)
 
-No static credentials. No human bottlenecks. Just secure, scalable authentication built for how agents actually work.
+**OAuth for AI Agents | Built for the Age of AI**
 
-## Features
+[Documentation](https://docs.authed.com) • [Quick Start](#⚡-quick-start) • [Examples](#💡-examples) • [Why Authed?](#🤔-why-authed)
 
-- 🤖 **Agent-to-Agent Communication**: Secure, authenticated communication between independent agents using DPoP-based proof of possession
-- 🔐 **Built-in Identity Verification**: Each agent gets a unique, verifiable ID through our registry
-- 🚦 **Dynamic Policy Engine**: Enforce access policies ensuring agents only interact with trusted entities
-- 🔄 **FastAPI Integration**: Seamless integration with FastAPI applications
-- 🛠️ **Developer-First**: Simple SDK and CLI tools for easy integration
+</div>
 
-## Quick Start
+---
 
-### Installation
+## 🤔 Why Authed?
+
+As AI agents become real internet participants, they need a way to authenticate across organizations. Current solutions like OAuth and API keys were built for humans and apps, forcing agents to rely on static credentials that don't scale.
+
+```python
+# 😫 Old way: Static API keys
+headers = {"Authorization": "Bearer static_api_key_123"}  # Same key everywhere
+
+# 🚀 Authed way: Dynamic agent-to-agent auth
+async with auth.secure_request("target-agent") as session:
+    response = await session.post("/endpoint")  # Automatic DPoP-based auth
+```
+
+## ⚡ Quick Start
 
 ```bash
+# Install Authed
 pip install agent-auth
-```
 
-### Basic Setup
-
-1. Initialize configuration:
-```bash
+# Set up your first agent
 agent-auth init config
-```
-
-2. Create your first agent:
-```bash
 agent-auth agents create --name my-first-agent
 ```
 
-### FastAPI Integration
+## 💡 Examples
+
+### Protect Your Endpoints
 
 ```python
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from agent_auth_client import verify_fastapi, AgentAuthManager
 
 app = FastAPI()
 
-# Initialize Authed
-auth = AgentAuthManager.initialize(
-    registry_url="your-registry-url",
-    agent_id="your-agent-id",
-    agent_secret="your-agent-secret"
-)
-
-# Protected endpoint
-@app.post("/secure-endpoint")
-@verify_fastapi
+@app.post("/secure")
+@verify_fastapi  # 🔒 One line to secure your endpoint
 async def secure_endpoint(request: Request):
     return {"message": "Authenticated!"}
-
-# Making authenticated requests
-@app.get("/call-other-agent")
-async def call_other_agent():
-    async with auth.secure_request("target-agent-id") as session:
-        response = await session.post(
-            "http://other-agent/secure-endpoint",
-            json={"message": "Hello!"}
-        )
-    return response.json()
 ```
 
-### Environment Variables
+### Make Authenticated Requests
 
-Configure Authed using environment variables:
+```python
+# Initialize with environment variables
+auth = AgentAuthManager.from_env()
+
+# Make secure requests to other agents
+async with auth.secure_request("target-agent") as session:
+    response = await session.post(
+        "http://other-agent/secure",
+        json={"message": "Hello from Agent!"}
+    )
+```
+
+## 🎯 Core Features
+
+- **🤖 True Agent Identity**: Each agent gets a unique, verifiable ID
+- **🔑 DPoP-Based Auth**: Proof of possession, not static keys
+- **🎮 Policy Engine**: Dynamic access control between agents
+- **⚡ FastAPI Integration**: One-line endpoint protection
+- **🛠️ Developer Experience**: Simple SDK and CLI tools
+
+## 🏗️ Use Cases
+
+<table>
+<tr>
+<td width="33%">
+<h3>🤝 Agent Communication</h3>
+Secure, authenticated messaging between independent AI agents
+</td>
+<td width="33%">
+<h3>💸 Transaction Systems</h3>
+Build secure transaction protocols with built-in identity verification
+</td>
+<td width="33%">
+<h3>🔒 Access Control</h3>
+Implement custom access scopes and permission boundaries
+</td>
+</tr>
+</table>
+
+## 🔧 Environment Setup
 
 ```bash
+# Set your environment variables
 export AGENT_AUTH_REGISTRY_URL="your-registry-url"
 export AGENT_AUTH_AGENT_ID="your-agent-id"
 export AGENT_AUTH_AGENT_SECRET="your-agent-secret"
 ```
 
-Then initialize:
+## 📚 Documentation
 
-```python
-auth = AgentAuthManager.from_env()
-```
+<table>
+<tr>
+<td width="25%">
+<a href="https://docs.authed.com/what-is-authed">
+🎓 Core Concepts
+</a>
+</td>
+<td width="25%">
+<a href="https://docs.authed.com/capabilities">
+🎯 Use Cases
+</a>
+</td>
+<td width="25%">
+<a href="https://docs.authed.com/sdk-guide">
+📖 SDK Guide
+</a>
+</td>
+<td width="25%">
+<a href="https://docs.authed.com/cli-tools">
+💻 CLI Reference
+</a>
+</td>
+</tr>
+</table>
 
-## Use Cases
+## ⚠️ Security Note
 
-- **Agent-to-Agent Communication**: Enable secure communication between independent AI agents
-- **Transaction Systems**: Build secure transaction protocols between agents with built-in identity verification
-- **Access Management**: Implement custom access scopes and permission boundaries for your agents
+Never commit agent secrets or provider credentials to version control. Use environment variables or secure secret management solutions in production.
 
-## Documentation
+## 🤝 Contributing
 
-For comprehensive documentation, visit [docs.authed.com](https://docs.authed.com):
+We love contributions! Check out our [Contributing Guide](CONTRIBUTING.md) to get started.
 
-- [Core Concepts](https://docs.authed.com/what-is-authed)
-- [Use Cases](https://docs.authed.com/capabilities)
-- [SDK Guide](https://docs.authed.com/sdk-guide)
-- [CLI Reference](https://docs.authed.com/cli-tools)
+<div align="center">
 
-## Security
+Made with ❤️ for the AI Agent ecosystem
 
-⚠️ **Important**: Never commit agent secrets or provider credentials to version control. Use environment variables or secure secret management solutions in production.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+</div>
