@@ -1,0 +1,218 @@
+---
+title: 'CLI Tools'
+description: 'Command line tools for managing Authed agents and authentication'
+---
+
+<div className="flex justify-center my-10">
+  <img
+    className="block dark:hidden w-[360px]"
+    src="/logo/dark.svg"
+    alt="Authed"
+  />
+  <img
+    className="hidden dark:block w-[360px]"
+    src="/logo/light.svg"
+    alt="Authed"
+  />
+</div>
+
+## Installation
+
+Install the Authed CLI tools using pip:
+
+```bash
+pip install agent-auth
+```
+
+## Quick Start
+
+The Authed CLI provides tools to manage your authentication system. Most commands support two modes:
+- **Interactive mode** (recommended): Guides you through options with helpful prompts
+- **Direct mode**: Useful for scripts and automation
+
+### Initial Setup
+
+Sets up your CLI with authentication details. This is the first step to start using Authed.
+
+Interactive (recommended):
+```bash
+agent-auth init config
+```
+This will prompt you for:
+- Registry URL: Where your authentication service is hosted
+- Provider ID: Your unique provider identifier
+- Provider Secret: Your provider's secret key
+
+Direct command:
+```bash
+agent-auth init config --registry-url <REGISTRY_URL> --provider-id <PROVIDER_ID> --provider-secret <PROVIDER_SECRET>
+```
+
+### Agent Management
+
+Agents are the core of Authed - they represent services or applications that need to communicate securely.
+
+Create agent (creates a new service identity):
+```bash
+agent-auth agents create
+```
+The CLI will guide you through:
+- Provider ID: Who owns this agent
+- Agent name: A friendly name for your service
+- Key file options: Where to store authentication keys
+
+Direct command:
+```bash
+agent-auth agents create --provider-id <PROVIDER_ID> --name <AGENT_NAME>
+```
+
+List all agents (see all your services):
+```bash
+agent-auth agents list
+```
+
+Get agent info (view details about a specific service):
+```bash
+agent-auth agents info
+```
+You'll be prompted for the agent ID, or use direct:
+```bash
+agent-auth agents info <AGENT_ID>
+```
+
+### Key Management
+
+Manage cryptographic keys used for secure authentication between agents.
+
+Generate keys (create new authentication keys):
+```bash
+agent-auth keys generate
+```
+You'll be asked for the output location, or use direct:
+```bash
+agent-auth keys generate --output <FILE_PATH>
+```
+
+View public key (safely share this with other services):
+```bash
+agent-auth keys show-public
+```
+You'll be prompted for the key file, or use direct:
+```bash
+agent-auth keys show-public <KEY_FILE>
+```
+
+### Permissions
+
+Control what your agents can access and do.
+
+List permissions (see what an agent can access):
+```bash
+agent-auth permissions list
+```
+You'll be prompted for:
+- Agent ID: Which agent to check
+- Output file: Where to save the permissions list (optional)
+
+Direct command:
+```bash
+agent-auth permissions list <AGENT_ID> [--output <FILE>]
+```
+
+Clear permissions (reset agent access):
+```bash
+agent-auth permissions clear
+```
+You'll be asked to confirm the action, or use direct:
+```bash
+agent-auth permissions clear <AGENT_ID> --force
+```
+
+### Logs
+
+Monitor and debug your authentication system.
+
+View logs (see authentication activity):
+```bash
+agent-auth logs fetch
+```
+You'll be prompted for:
+- Agent ID: Which agent to check
+- Log level: How detailed (INFO, WARNING, ERROR)
+- Number of logs: How many to fetch
+- Output file: Where to save logs
+
+Direct command:
+```bash
+agent-auth logs fetch --agent-id <AGENT_ID> --level ERROR --limit 10
+```
+
+Stream logs (watch authentication activity in real-time):
+```bash
+agent-auth logs stream
+```
+You'll be prompted for filtering options, or use direct:
+```bash
+agent-auth logs stream --agent-id <AGENT_ID>
+```
+
+## Environment Variables
+
+Make your scripts easier by setting these environment variables instead of passing them in every command:
+
+```bash
+export AGENT_AUTH_REGISTRY_URL="https://registry.authed.com"
+export AGENT_AUTH_PROVIDER_ID="your_provider_id"
+export AGENT_AUTH_PROVIDER_SECRET="your_provider_secret"
+```
+
+## Common Workflows
+
+### Setting Up a New Agent
+
+Here's how to create a new service that can authenticate with others:
+
+Interactive (recommended):
+```bash
+# Generate keys with prompts - creates secure authentication keys
+agent-auth keys generate
+
+# Create agent with guided setup - registers your service
+agent-auth agents create
+```
+
+Direct commands:
+```bash
+# Generate keys
+agent-auth keys generate --output agent-keys.json
+
+# Create agent
+agent-auth agents create --provider-id my-provider --name worker-1 --key-file agent-keys.json
+```
+
+### Monitoring Events
+
+Keep track of your authentication system:
+
+Interactive:
+```bash
+# View logs with filtering options
+agent-auth logs fetch
+```
+
+Direct:
+```bash
+# View recent errors
+agent-auth logs fetch --level ERROR --limit 10
+
+# Export to file for analysis
+agent-auth logs fetch --from-date 2024-01-01 --output logs.json
+```
+
+## Best Practices
+
+1. Use interactive mode when getting started - it's more helpful and prevents mistakes
+2. Switch to direct commands for automation and scripts
+3. Use descriptive agent names to easily identify services
+4. Regularly rotate agent keys to maintain security
+5. Monitor authentication logs to catch issues early 

@@ -1,0 +1,110 @@
+---
+title: 'What is Authed?'
+description: 'OAuth for AI agents - secure, scalable authentication built for how agents actually work'
+---
+
+<div className="flex justify-center my-10">
+  <img
+    className="block dark:hidden w-[360px]"
+    src="/logo/dark.svg"
+    alt="Authed"
+  />
+  <img
+    className="hidden dark:block w-[360px]"
+    src="/logo/light.svg"
+    alt="Authed"
+  />
+</div>
+
+## Overview
+
+We're building Authed - OAuth for AI agents. As AI agents become real internet participants, they need a way to authenticate across organizations. OAuth and API keys were built for humans and apps, forcing agents to rely on static credentials that don't scale.
+
+Authed is a developer-first, open-source protocol that gives agents their own ID, allowing them to securely authenticate with each other - across different ecosystems - without static keys or manual approvals. Our registry verifies identities and dynamically enforces access policies, ensuring agents only interact with trusted entities.
+
+No static credentials. No human bottlenecks. Just secure, scalable authentication built for how agents actually work.
+
+## Core Concepts
+
+<CardGroup cols={2}>
+  <Card
+    title="Agents"
+    icon="robot"
+  >
+    Independent AI agents that need to communicate securely with each other across organizations
+  </Card>
+  <Card
+    title="Registry"
+    icon="database"
+  >
+    Central system for verifying agent identities and enforcing dynamic access policies
+  </Card>
+  <Card
+    title="DPoP Authentication"
+    icon="key"
+  >
+    Secure token-based authentication with proof of possession for enhanced security
+  </Card>
+  <Card
+    title="Policy Engine"
+    icon="shield-check"
+  >
+    Dynamic access control system ensuring agents only interact with trusted entities
+  </Card>
+</CardGroup>
+
+## Key Features
+
+- **Secure Agent Management**: Create, manage, and authenticate agents with unique identities
+- **FastAPI Integration**: Seamless integration with FastAPI applications
+- **DPoP Support**: Enhanced security with Demonstrating Proof of Possession
+- **Comprehensive Logging**: Monitor and track all authentication events
+- **Flexible Configuration**: Support for environment variables and configuration files
+- **Permission Management**: Fine-grained access control between agents
+- **Key Management**: Secure key generation and rotation capabilities
+- **Real-time Monitoring**: Stream and analyze authentication events
+
+## Tools and Components
+
+<CardGroup cols={2}>
+  <Card
+    title="CLI Tool"
+    icon="terminal"
+  >
+    Command-line interface for managing agents, keys, and permissions
+  </Card>
+  <Card
+    title="Python SDK"
+    icon="code"
+  >
+    Easy-to-use SDK for integrating authentication in your applications
+  </Card>
+  <Card
+    title="Logging System"
+    icon="file-lines"
+  >
+    Comprehensive logging and monitoring capabilities
+  </Card>
+  <Card
+    title="Security Tools"
+    icon="shield-check"
+  >
+    Built-in security features and best practices
+  </Card>
+</CardGroup>
+
+## Getting Started
+
+To start using Authed, you'll need to:
+
+1. Install the package using pip:
+```bash
+pip install agent-auth
+```
+
+2. Choose your integration method:
+   - Use the CLI for agent management
+   - Integrate the SDK into your applications
+   - Set up FastAPI endpoint protection
+
+Check out our [Quickstart Guide](/quickstart) to begin your implementation. 
