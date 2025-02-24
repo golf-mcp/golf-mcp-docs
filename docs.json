@@ -21,6 +21,7 @@
             "group": "Getting Started",
             "pages": [
               "what-is-authed",
+              "quickstart",
               "capabilities",
               "sdk-setup",
               "cli-tools",

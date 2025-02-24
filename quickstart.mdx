@@ -1,6 +1,6 @@
 ---
 title: 'Quickstart'
-description: 'Get started with Authed in minutes'
+description: 'Get started with authed in minutes'
 ---
 
 <div className="flex justify-center my-10">
@@ -16,28 +16,55 @@ description: 'Get started with Authed in minutes'
   />
 </div>
 
-## Quick Setup
+<Note>
+  While authed is open source, we are currently only support our hosted registry (https://api.getauthed.dev). Self-hosting registries is possible but not officially supported or documented yet.
+</Note>
 
-Get Authed up and running in your project in just a few minutes.
+## Getting started
 
 <Steps>
-  <Step title="Install Authed">
+  <Step title="Register as a provider">
+    Before installing authed, you'll need to register as a provider:
+    
+    <Card
+      title="Register now"
+      icon="user-plus"
+      href="https://getauthed.dev/"
+    >
+      Create a provider account to start managing agents
+    </Card>
+    
+    Save your provider ID and secret - you'll need these for the next steps.
+  </Step>
+
+  <Step title="Install authed">
     Install using pip:
     ```bash
     pip install agent-auth
     ```
   </Step>
-  <Step title="Initialize Configuration">
+
+  <Step title="Generate keypair">
+    Generate a keypair for secure agent communication:
+    ```bash
+    agent-auth keys generate --output agent_keys.json
+    ```
+    Save this file securely - you'll need these keys for authentication. See our [CLI documentation](/cli-tools#key-management) for more details.
+  </Step>
+
+  <Step title="Initialize configuration">
     Set up your authentication details:
     ```bash
     agent-auth init config
     ```
     This will prompt you for:
-    - Registry URL
+    - Registry URL (our hosted registry: https://api.getauthed.dev)
     - Provider ID
-    - Provider Secret
+    - Provider secret
+
   </Step>
-  <Step title="Create Your First Agent">
+
+  <Step title="Create your first agent">
     ```bash
     agent-auth agents create --name my-first-agent
     ```
@@ -45,9 +72,9 @@ Get Authed up and running in your project in just a few minutes.
   </Step>
 </Steps>
 
-## Basic Integration
+## Basic integration
 
-### FastAPI Example
+### FastAPI example
 
 Here's a minimal example of integrating Authed with FastAPI:
 
@@ -83,18 +110,39 @@ async def call_other_agent():
 
 ## Environment Setup
 
-You can also configure Authed using environment variables:
+You can configure Authed using environment variables in your `.env` file:
 
-```bash
-export AGENT_AUTH_REGISTRY_URL="your-registry-url"
-export AGENT_AUTH_AGENT_ID="your-agent-id"
-export AGENT_AUTH_AGENT_SECRET="your-agent-secret"
+```bash:.env
+# Registry and agent configuration
+AUTHED_REGISTRY_URL="https://api.getauthed.dev"
+AUTHED_AGENT_ID="your-agent-id"
+AUTHED_AGENT_SECRET="your-agent-secret"
+
+# Keys for signing and verifying requests
+AUTHED_PRIVATE_KEY="your-private-key"
+AUTHED_PUBLIC_KEY="your-public-key"
 ```
 
-Then initialize without parameters:
+There are several ways to initialize the SDK:
 
 ```python
+# Will use AUTHED_* environment variables if they exist
 auth = AgentAuthManager.from_env()
+
+# Option 2: Load keys from file and initialize explicitly
+def load_keys(keys_file: str = "agent_keys.json"):
+    with open(keys_file) as f:
+        keys = json.load(f)
+    return keys["public_key"], keys["private_key"]
+    
+public_key, private_key = load_keys()
+auth = AgentAuthManager.initialize(
+    registry_url=os.getenv("AUTHED_REGISTRY_URL"),
+    agent_id=os.getenv("AUTHED_AGENT_ID"),
+    agent_secret=os.getenv("AUTHED_AGENT_SECRET"),
+    private_key=private_key,
+    public_key=public_key
+)
 ```
 
 ## Next Steps
