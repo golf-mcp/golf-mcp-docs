@@ -1,218 +1,213 @@
 ---
-title: 'CLI Tools'
+title: 'CLI'
 description: 'Command line tools for managing Authed agents and authentication'
 ---
 
-<div className="flex justify-center my-10">
-  <img
-    className="block dark:hidden w-[360px]"
-    src="/logo/dark.svg"
-    alt="Authed"
-  />
-  <img
-    className="hidden dark:block w-[360px]"
-    src="/logo/light.svg"
-    alt="Authed"
-  />
-</div>
-
 ## Installation
-
-Install the Authed CLI tools using pip:
 
 ```bash
 pip install agent-auth
 ```
 
-## Quick Start
+<Note>
+  Parameters in [square brackets] are optional. All other parameters are required.
+</Note>
 
-The Authed CLI provides tools to manage your authentication system. Most commands support two modes:
-- **Interactive mode** (recommended): Guides you through options with helpful prompts
-- **Direct mode**: Useful for scripts and automation
+## Global configuration
 
-### Initial Setup
+The CLI can be configured in two ways (in order of precedence):
+1. Command line arguments
+2. Environment variables
 
-Sets up your CLI with authentication details. This is the first step to start using Authed.
+### Environment variables
 
-Interactive (recommended):
+```bash
+AUTHED_REGISTRY_URL="https://api.getauthed.dev"
+AUTHED_PROVIDER_ID="<your-provider-id>"
+AUTHED_PROVIDER_SECRET="<your-provider-secret>"
+```
+
+## Commands
+
+### Initialize configuration
+
+Configure CLI:
 ```bash
 agent-auth init config
 ```
-This will prompt you for:
-- Registry URL: Where your authentication service is hosted
-- Provider ID: Your unique provider identifier
-- Provider Secret: Your provider's secret key
 
-Direct command:
+Show current config:
 ```bash
-agent-auth init config --registry-url <REGISTRY_URL> --provider-id <PROVIDER_ID> --provider-secret <PROVIDER_SECRET>
+agent-auth init show
 ```
 
-### Agent Management
-
-Agents are the core of Authed - they represent services or applications that need to communicate securely.
-
-Create agent (creates a new service identity):
+Clear config (--force skips confirmation):
 ```bash
-agent-auth agents create
-```
-The CLI will guide you through:
-- Provider ID: Who owns this agent
-- Agent name: A friendly name for your service
-- Key file options: Where to store authentication keys
-
-Direct command:
-```bash
-agent-auth agents create --provider-id <PROVIDER_ID> --name <AGENT_NAME>
+agent-auth init clear [--force]
 ```
 
-List all agents (see all your services):
+### Agent management
+
+List agents:
 ```bash
-agent-auth agents list
+agent-auth agents list [--output <FILE>]
 ```
 
-Get agent info (view details about a specific service):
+Create agent:
 ```bash
-agent-auth agents info
+agent-auth agents create --name <AGENT_NAME> [--key-file <KEY_FILE>]
 ```
-You'll be prompted for the agent ID, or use direct:
+
+Get agent info:
 ```bash
 agent-auth agents info <AGENT_ID>
 ```
 
-### Key Management
-
-Manage cryptographic keys used for secure authentication between agents.
-
-Generate keys (create new authentication keys):
+Delete agent (--force skips confirmation):
 ```bash
-agent-auth keys generate
-```
-You'll be asked for the output location, or use direct:
-```bash
-agent-auth keys generate --output <FILE_PATH>
+agent-auth agents delete <AGENT_ID> [--force]
 ```
 
-View public key (safely share this with other services):
+### Key management
+
+Generate keypair:
 ```bash
-agent-auth keys show-public
+agent-auth keys generate [--output <FILE>]
 ```
-You'll be prompted for the key file, or use direct:
+
+Show public key:
 ```bash
 agent-auth keys show-public <KEY_FILE>
 ```
 
-### Permissions
-
-Control what your agents can access and do.
-
-List permissions (see what an agent can access):
+Show private key (--force required as safety measure):
 ```bash
-agent-auth permissions list
+agent-auth keys show-private <KEY_FILE> --force
 ```
-You'll be prompted for:
-- Agent ID: Which agent to check
-- Output file: Where to save the permissions list (optional)
 
-Direct command:
+### Permission management
+
+List permissions:
 ```bash
 agent-auth permissions list <AGENT_ID> [--output <FILE>]
 ```
 
-Clear permissions (reset agent access):
+Grant agent permission:
 ```bash
-agent-auth permissions clear
-```
-You'll be asked to confirm the action, or use direct:
-```bash
-agent-auth permissions clear <AGENT_ID> --force
+agent-auth permissions grant <AGENT_ID> \
+  --type allow_agent \
+  --target-id <TARGET_AGENT_ID>
 ```
 
-### Logs
-
-Monitor and debug your authentication system.
-
-View logs (see authentication activity):
+Grant provider permission:
 ```bash
-agent-auth logs fetch
-```
-You'll be prompted for:
-- Agent ID: Which agent to check
-- Log level: How detailed (INFO, WARNING, ERROR)
-- Number of logs: How many to fetch
-- Output file: Where to save logs
-
-Direct command:
-```bash
-agent-auth logs fetch --agent-id <AGENT_ID> --level ERROR --limit 10
+agent-auth permissions grant <AGENT_ID> \
+  --type allow_provider \
+  --target-id <TARGET_PROVIDER_ID>
 ```
 
-Stream logs (watch authentication activity in real-time):
+Revoke permission (--force skips confirmation):
 ```bash
-agent-auth logs stream
-```
-You'll be prompted for filtering options, or use direct:
-```bash
-agent-auth logs stream --agent-id <AGENT_ID>
-```
-
-## Environment Variables
-
-Make your scripts easier by setting these environment variables instead of passing them in every command:
-
-```bash
-export AGENT_AUTH_REGISTRY_URL="https://registry.authed.com"
-export AGENT_AUTH_PROVIDER_ID="your_provider_id"
-export AGENT_AUTH_PROVIDER_SECRET="your_provider_secret"
+agent-auth permissions revoke <AGENT_ID> \
+  --type allow_agent \
+  --target-id <TARGET_ID> \
+  [--force]
 ```
 
-## Common Workflows
-
-### Setting Up a New Agent
-
-Here's how to create a new service that can authenticate with others:
-
-Interactive (recommended):
+Clear permissions (--force skips confirmation):
 ```bash
-# Generate keys with prompts - creates secure authentication keys
-agent-auth keys generate
-
-# Create agent with guided setup - registers your service
-agent-auth agents create
+agent-auth permissions clear <AGENT_ID> [--force]
 ```
 
-Direct commands:
-```bash
-# Generate keys
-agent-auth keys generate --output agent-keys.json
+### Log management
 
-# Create agent
-agent-auth agents create --provider-id my-provider --name worker-1 --key-file agent-keys.json
+Stream logs:
+```bash
+agent-auth logs stream \
+  --agent-id <AGENT_ID> \
+  [--level INFO|WARNING|ERROR] \
+  [--output <FILE>]
 ```
 
-### Monitoring Events
-
-Keep track of your authentication system:
-
-Interactive:
+Fetch logs:
 ```bash
-# View logs with filtering options
-agent-auth logs fetch
+agent-auth logs fetch \
+  --agent-id <AGENT_ID> \
+  [--level INFO|WARNING|ERROR] \
+  [--limit <NUMBER>] \
+  [--output <FILE>]
 ```
 
-Direct:
-```bash
-# View recent errors
-agent-auth logs fetch --level ERROR --limit 10
+## Common workflows
 
-# Export to file for analysis
-agent-auth logs fetch --from-date 2024-01-01 --output logs.json
+### Setting up a new agent
+
+1. Generate keys:
+```bash
+agent-auth keys generate --output agent_keys.json
 ```
 
-## Best Practices
+2. Create agent:
+```bash
+agent-auth agents create \
+  --name "my-agent" \
+  --key-file agent_keys.json
+```
 
-1. Use interactive mode when getting started - it's more helpful and prevents mistakes
-2. Switch to direct commands for automation and scripts
-3. Use descriptive agent names to easily identify services
-4. Regularly rotate agent keys to maintain security
-5. Monitor authentication logs to catch issues early 
+3. Verify creation:
+```bash
+agent-auth agents info <AGENT_ID>
+```
+
+### Managing permissions
+
+List current permissions:
+```bash
+agent-auth permissions list <AGENT_ID>
+```
+
+Grant agent access:
+```bash
+agent-auth permissions grant <AGENT_ID> \
+  --type allow_agent \
+  --target-id <TARGET_AGENT_ID>
+```
+
+Grant provider access:
+```bash
+agent-auth permissions grant <AGENT_ID> \
+  --type allow_provider \
+  --target-id <TARGET_PROVIDER_ID>
+```
+
+## Output formats
+
+### JSON output
+When using `--output` flag, data is saved in JSON format:
+
+```json
+{
+  "agents": [
+    {
+      "agent_id": "...",
+      "name": "...",
+      "provider_id": "...",
+      "created_at": "...",
+      "permissions": [
+        {
+          "type": "allow_agent",
+          "target_id": "..."
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Terminal output
+Without `--output`, the CLI provides colored, formatted output:
+- Success messages in green (✓)
+- Warnings in yellow (⚠️)
+- Errors in red (✗)
+- IDs and technical values in different colors for readability
+

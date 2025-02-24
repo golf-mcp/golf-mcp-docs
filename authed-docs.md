@@ -43,7 +43,7 @@ agent-auth init config --registry-url <URL> --provider-id <ID> --provider-secret
 agent-auth init clear [--force]
 ```
 
-The configuration will be saved in `~/.agent-auth/config.json`.
+The configuration will be saved in `~/.authed/config.json`.
 
 ### CLI Commands
 
