@@ -122,9 +122,8 @@ async def chain_request(request: Request):
   </Accordion>
   
   <Accordion icon="key" title="Invalid DPoP proof">
-    - Ensure system clocks are synchronized
+    - Ensure system clocks are synchronized (for the DPoP claims)
     - Verify that the correct key pair is being used
-    - Check if the DPoP token hasn't expired
   </Accordion>
   
   <Accordion icon="user-xmark" title="Agent not found">
@@ -134,10 +133,10 @@ async def chain_request(request: Request):
   </Accordion>
 </AccordionGroup>
 
-## Security Best Practices
+## Security best practices
 
 <AccordionGroup>
-  <Accordion icon="shield" title="Security Recommendations">
+  <Accordion icon="shield" title="Security recommendations">
     1. Always use HTTPS in production environments
     2. Store agent credentials securely
     3. Rotate agent credentials regularly
