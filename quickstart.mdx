@@ -40,14 +40,14 @@ description: 'Get started with authed in minutes'
   <Step title="Install authed">
     Install using pip:
     ```bash
-    pip install agent-auth
+    pip install authed
     ```
   </Step>
 
   <Step title="Generate keypair">
     Generate a keypair for secure agent communication:
     ```bash
-    agent-auth keys generate --output agent_keys.json
+    authed keys generate --output agent_keys.json
     ```
     Save this file securely - you'll need these keys for authentication. See our [CLI documentation](/cli-tools#key-management) for more details.
   </Step>
@@ -55,7 +55,7 @@ description: 'Get started with authed in minutes'
   <Step title="Initialize configuration">
     Set up your authentication details:
     ```bash
-    agent-auth init config
+    authed init config
     ```
     This will prompt you for:
     - Registry URL (our hosted registry: https://api.getauthed.dev)
@@ -66,7 +66,7 @@ description: 'Get started with authed in minutes'
 
   <Step title="Create your first agent">
     ```bash
-    agent-auth agents create --name my-first-agent
+    authed agents create --name my-first-agent
     ```
     Save the returned agent ID and secret - you'll need these for authentication.
   </Step>

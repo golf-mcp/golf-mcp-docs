@@ -33,82 +33,82 @@ AUTHED_PROVIDER_SECRET="<your-provider-secret>"
 
 Configure CLI:
 ```bash
-agent-auth init config
+authed init config
 ```
 
 Show current config:
 ```bash
-agent-auth init show
+authed init show
 ```
 
 Clear config (--force skips confirmation):
 ```bash
-agent-auth init clear [--force]
+authed init clear [--force]
 ```
 
 ### Agent management
 
 List agents:
 ```bash
-agent-auth agents list [--output <FILE>]
+authed agents list [--output <FILE>]
 ```
 
 Create agent:
 ```bash
-agent-auth agents create --name <AGENT_NAME> [--key-file <KEY_FILE>]
+authed agents create --name <AGENT_NAME> [--key-file <KEY_FILE>]
 ```
 
 Get agent info:
 ```bash
-agent-auth agents info <AGENT_ID>
+authed agents info <AGENT_ID>
 ```
 
 Delete agent (--force skips confirmation):
 ```bash
-agent-auth agents delete <AGENT_ID> [--force]
+authed agents delete <AGENT_ID> [--force]
 ```
 
 ### Key management
 
 Generate keypair:
 ```bash
-agent-auth keys generate [--output <FILE>]
+authed keys generate [--output <FILE>]
 ```
 
 Show public key:
 ```bash
-agent-auth keys show-public <KEY_FILE>
+authed keys show-public <KEY_FILE>
 ```
 
 Show private key (--force required as safety measure):
 ```bash
-agent-auth keys show-private <KEY_FILE> --force
+authed keys show-private <KEY_FILE> --force
 ```
 
 ### Permission management
 
 List permissions:
 ```bash
-agent-auth permissions list <AGENT_ID> [--output <FILE>]
+authed permissions list <AGENT_ID> [--output <FILE>]
 ```
 
 Grant agent permission:
 ```bash
-agent-auth permissions grant <AGENT_ID> \
+authed permissions grant <AGENT_ID> \
   --type allow_agent \
   --target-id <TARGET_AGENT_ID>
 ```
 
 Grant provider permission:
 ```bash
-agent-auth permissions grant <AGENT_ID> \
+authed permissions grant <AGENT_ID> \
   --type allow_provider \
   --target-id <TARGET_PROVIDER_ID>
 ```
 
 Revoke permission (--force skips confirmation):
 ```bash
-agent-auth permissions revoke <AGENT_ID> \
+authed permissions revoke <AGENT_ID> \
   --type allow_agent \
   --target-id <TARGET_ID> \
   [--force]
@@ -116,14 +116,14 @@ agent-auth permissions revoke <AGENT_ID> \
 
 Clear permissions (--force skips confirmation):
 ```bash
-agent-auth permissions clear <AGENT_ID> [--force]
+authed permissions clear <AGENT_ID> [--force]
 ```
 
 ### Log management
 
 Stream logs:
 ```bash
-agent-auth logs stream \
+authed logs stream \
   --agent-id <AGENT_ID> \
   [--level INFO|WARNING|ERROR] \
   [--output <FILE>]
@@ -131,7 +131,7 @@ agent-auth logs stream \
 
 Fetch logs:
 ```bash
-agent-auth logs fetch \
+authed logs fetch \
   --agent-id <AGENT_ID> \
   [--level INFO|WARNING|ERROR] \
   [--limit <NUMBER>] \
@@ -144,38 +144,38 @@ agent-auth logs fetch \
 
 1. Generate keys:
 ```bash
-agent-auth keys generate --output agent_keys.json
+authed keys generate --output agent_keys.json
 ```
 
 2. Create agent:
 ```bash
-agent-auth agents create \
+authed agents create \
   --name "my-agent" \
   --key-file agent_keys.json
 ```
 
 3. Verify creation:
 ```bash
-agent-auth agents info <AGENT_ID>
+authed agents info <AGENT_ID>
 ```
 
 ### Managing permissions
 
 List current permissions:
 ```bash
-agent-auth permissions list <AGENT_ID>
+authed permissions list <AGENT_ID>
 ```
 
 Grant agent access:
 ```bash
-agent-auth permissions grant <AGENT_ID> \
+authed permissions grant <AGENT_ID> \
   --type allow_agent \
   --target-id <TARGET_AGENT_ID>
 ```
 
 Grant provider access:
 ```bash
-agent-auth permissions grant <AGENT_ID> \
+authed permissions grant <AGENT_ID> \
   --type allow_provider \
   --target-id <TARGET_PROVIDER_ID>
 ```
