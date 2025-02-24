@@ -15,10 +15,10 @@ pip install authed
 ### Initialize the SDK
 
 ```python
-from agent_auth_client import AgentAuthManager
+from client.sdk import Authed
 
 # Initialize with explicit credentials
-auth = AgentAuthManager.initialize(
+auth = Authed.initialize(
     registry_url="https://api.getauthed.dev",
     agent_id="your-agent-id",
     agent_secret="your-agent-secret",
@@ -27,7 +27,7 @@ auth = AgentAuthManager.initialize(
 )
 
 # Or initialize from environment variables
-auth = AgentAuthManager.from_env()
+auth = Authed.from_env()
 ```
 
 ### Environment Variables

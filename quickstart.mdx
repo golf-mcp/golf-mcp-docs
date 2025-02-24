@@ -80,13 +80,13 @@ Here's a minimal example of integrating Authed with FastAPI:
 
 ```python
 from fastapi import FastAPI, Request
-from agent_auth_client import verify_fastapi, protect_httpx, AgentAuthManager
+from authed import Authed, verify_fastapi, protect_httpx
 import httpx
 
 app = FastAPI()
 
 # Initialize Authed with keys
-auth = AgentAuthManager.initialize(
+auth = Authed.initialize(
     registry_url="https://api.getauthed.dev",
     agent_id="your-agent-id",
     agent_secret="your-agent-secret",
@@ -136,7 +136,7 @@ There are several ways to initialize the SDK:
 
 ```python
 # Will use AUTHED_* environment variables if they exist
-auth = AgentAuthManager.from_env()
+auth = Authed.from_env()
 
 # Option 2: Load keys from file and initialize explicitly
 def load_keys(keys_file: str = "agent_keys.json"):
@@ -145,7 +145,7 @@ def load_keys(keys_file: str = "agent_keys.json"):
     return keys["public_key"], keys["private_key"]
     
 public_key, private_key = load_keys()
-auth = AgentAuthManager.initialize(
+auth = Authed.initialize(
     registry_url=os.getenv("AUTHED_REGISTRY_URL"),
     agent_id=os.getenv("AUTHED_AGENT_ID"),
     agent_secret=os.getenv("AUTHED_AGENT_SECRET"),
