@@ -80,15 +80,18 @@ Here's a minimal example of integrating Authed with FastAPI:
 
 ```python
 from fastapi import FastAPI, Request
-from agent_auth_client import verify_fastapi, AgentAuthManager
+from agent_auth_client import verify_fastapi, protect_httpx, AgentAuthManager
+import httpx
 
 app = FastAPI()
 
-# Initialize Authed
+# Initialize Authed with keys
 auth = AgentAuthManager.initialize(
-    registry_url="your-registry-url",
+    registry_url="https://api.getauthed.dev",
     agent_id="your-agent-id",
-    agent_secret="your-agent-secret"
+    agent_secret="your-agent-secret",
+    private_key="your-private-key",
+    public_key="your-public-key"
 )
 
 # Protected endpoint
@@ -99,16 +102,22 @@ async def secure_endpoint(request: Request):
 
 # Making authenticated requests
 @app.get("/call-other-agent")
+@protect_httpx()
 async def call_other_agent():
-    async with auth.secure_request("target-agent-id") as session:
-        response = await session.post(
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
             "http://other-agent/secure-endpoint",
+            headers={"target-agent-id": "target-agent-uuid"},
             json={"message": "Hello!"}
         )
     return response.json()
 ```
 
-## Environment Setup
+<Note>
+  For brevity, this example shows keys as strings. In practice, you should load them from your environment or key files.
+</Note>
+
+## Environment setup
 
 You can configure Authed using environment variables in your `.env` file:
 
@@ -145,32 +154,32 @@ auth = AgentAuthManager.initialize(
 )
 ```
 
-## Next Steps
+## Next steps
 
 <CardGroup cols={2}>
   <Card
-    title="Core Concepts"
+    title="Core concepts"
     icon="book"
     href="/what-is-authed"
   >
     Learn about Authed's core concepts and architecture
   </Card>
   <Card
-    title="Use Cases"
+    title="Use cases"
     icon="lightbulb"
     href="/capabilities"
   >
     Explore different ways to use Authed in your applications
   </Card>
   <Card
-    title="SDK Guide"
+    title="SDK guide"
     icon="code"
     href="/sdk-guide"
   >
     Dive deeper into the SDK features and capabilities
   </Card>
   <Card
-    title="CLI Reference"
+    title="CLI reference"
     icon="terminal"
     href="/cli-tools"
   >
