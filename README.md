@@ -1,214 +1,112 @@
-# 🔐 Authed
+# Authed - OAuth for AI Agents
 
-<div align="center">
+## Overview
 
-[![PyPI version](https://badge.fury.io/py/agent-auth.svg)](https://badge.fury.io/py/agent-auth)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com)
+We're building Authed - OAuth for AI agents. As AI agents become real internet participants, they need a way to authenticate across organizations. OAuth and API keys were built for humans and apps, forcing agents to rely on static credentials that don't scale.
 
-**OAuth for AI Agents | Built for the Age of AI**
+Authed is a developer-first, open-source protocol that gives agents their own ID, allowing them to securely authenticate with each other - across different ecosystems - without static keys or manual approvals. Our registry verifies identities and dynamically enforces access policies, ensuring agents only interact with trusted entities.
 
-[Documentation](https://docs.getauthed.dev) • [Quick Start](#⚡-quick-start) • [Examples](#💡-examples) • [Why Authed?](#🤔-why-authed)
+No static credentials. No human bottlenecks. Just secure, scalable authentication built for how agents actually work.
 
-</div>
+## Quick Start
 
----
+> **Note**: While Authed is open source, we currently only support our hosted registry (https://api.getauthed.dev). Self-hosting registries is possible but not officially supported yet.
 
-## 🤔 Why Authed?
+### 1. Register as a Provider
 
-As AI agents become real internet participants, they need a way to authenticate across organizations. Current solutions like OAuth and API keys were built for humans and apps, forcing agents to rely on static credentials that don't scale.
+Before installing Authed, [register as a provider](https://getauthed.dev/). Save your provider ID and secret - you'll need these for configuration.
 
-```python
-# 😫 Old way: Static API keys
-headers = {"Authorization": "Bearer static_api_key_123"}  # Same key everywhere
-
-# 🚀 Authed way: Dynamic agent-to-agent auth
-async with auth.secure_request("target-agent") as session:
-    response = await session.post("/endpoint")  # Automatic DPoP-based auth
-```
-
-## ⚡ Quick Start
+### 2. Install Authed
 
 ```bash
-# Install Authed
-pip install agent-auth
-
-# Set up your first agent
-agent-auth init config
-agent-auth agents create --name my-first-agent
+pip install authed
 ```
 
-## 💡 Examples
+### 3. Generate Keypair
 
-### Real-World: Healthcare Data Exchange
+```bash
+authed keys generate --output agent_keys.json
+```
+
+### 4. Initialize Configuration
+
+```bash
+authed init config
+```
+
+This will prompt you for:
+- Registry URL (https://api.getauthed.dev)
+- Provider ID
+- Provider secret
+
+### 5. Create Your First Agent
+
+```bash
+authed agents create --name my-first-agent
+```
+
+## Basic Integration
+
+Here's a minimal example using FastAPI:
 
 ```python
-from fastapi import FastAPI
-from langchain.agents import AgentExecutor, Tool
-from langchain.chat_models import ChatOpenAI
-from agent_auth_client import verify_fastapi, AgentAuthManager
+from fastapi import FastAPI, Request
+from authed import Authed, verify_fastapi, protect_httpx
+import httpx
 
 app = FastAPI()
-auth = AgentAuthManager.from_env()
 
-# Health Records Agent: Securely manages patient data
-class HealthRecordsAgent:
-    @app.post("/health-records")
-    @verify_fastapi  # 🔒 Secure health data endpoint
-    async def process_insurance_request(request: Request):
-        # Create a secure agent for processing health records
-        llm = ChatOpenAI(temperature=0)
-        tools = [
-            Tool(
-                name="fetch_patient_history",
-                func=lambda patient_id: "Retrieve encrypted patient history",
-                description="Securely fetch patient medical history"
-            ),
-            Tool(
-                name="prepare_insurance_report",
-                func=lambda data: "Generate insurance-ready health report",
-                description="Prepare medical data for insurance processing"
-            )
-        ]
-        
-        agent = AgentExecutor.from_agent_and_tools(
-            agent=your_agent,
-            tools=tools
-        )
-        
-        return await agent.arun("Prepare insurance report for patient")
+# Initialize Authed
+auth = Authed.initialize(
+    registry_url="https://api.getauthed.dev",
+    agent_id="your-agent-id",
+    agent_secret="your-agent-secret",
+    private_key="your-private-key",
+    public_key="your-public-key"
+)
 
-# Insurance Broker Agent: Processes claims
-class InsuranceBrokerAgent:
-    async def request_health_records(self, patient_id: str):
-        # Authenticate and request records from health records agent
-        async with auth.secure_request("health-records-agent") as session:
-            response = await session.post(
-                "http://health-records-agent/health-records",
-                json={
-                    "patient_id": patient_id,
-                    "request_type": "insurance_verification",
-                    "required_fields": [
-                        "diagnosis_codes",
-                        "treatment_history",
-                        "prescription_records"
-                    ]
-                }
-            )
-        return response.json()
-
-# Example usage
-@app.post("/process-claim")
+# Protected endpoint
+@app.post("/secure-endpoint")
 @verify_fastapi
-async def process_insurance_claim(request: Request):
-    broker = InsuranceBrokerAgent()
-    # Securely fetch and process health records
-    records = await broker.request_health_records("patient123")
-    return {"status": "Claim processed", "verification": records}
-```
-
-### Basic FastAPI Integration
-
-```python
-from fastapi import FastAPI
-from agent_auth_client import verify_fastapi, AgentAuthManager
-
-app = FastAPI()
-
-@app.post("/secure")
-@verify_fastapi  # 🔒 One line to secure your endpoint
 async def secure_endpoint(request: Request):
     return {"message": "Authenticated!"}
+
+# Making authenticated requests
+@app.get("/call-other-agent")
+@protect_httpx()
+async def call_other_agent():
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "http://other-agent/secure-endpoint",
+            headers={"target-agent-id": "target-agent-uuid"},
+            json={"message": "Hello!"}
+        )
+    return response.json()
 ```
 
-### Make Authenticated Requests
+## Environment Setup
 
-```python
-# Initialize with environment variables
-auth = AgentAuthManager.from_env()
-
-# Make secure requests to other agents
-async with auth.secure_request("target-agent") as session:
-    response = await session.post(
-        "http://other-agent/secure",
-        json={"message": "Hello from Agent!"}
-    )
-```
-
-## 🎯 Core Features
-
-- **🤖 True Agent Identity**: Each agent gets a unique, verifiable ID
-- **🔑 DPoP-Based Auth**: Proof of possession, not static keys
-- **🎮 Policy Engine**: Dynamic access control between agents
-- **⚡ FastAPI Integration**: One-line endpoint protection
-- **🛠️ Developer Experience**: Simple SDK and CLI tools
-
-## 🏗️ Use Cases
-
-<table>
-<tr>
-<td width="33%">
-<h3>🤝 Agent Communication</h3>
-Secure, authenticated messaging between independent AI agents
-</td>
-<td width="33%">
-<h3>💸 Transaction Systems</h3>
-Build secure transaction protocols with built-in identity verification
-</td>
-<td width="33%">
-<h3>🔒 Access Control</h3>
-Implement custom access scopes and permission boundaries
-</td>
-</tr>
-</table>
-
-## 🔧 Environment Setup
+Configure Authed using environment variables:
 
 ```bash
-# Set your environment variables
-export AGENT_AUTH_REGISTRY_URL="your-registry-url"
-export AGENT_AUTH_AGENT_ID="your-agent-id"
-export AGENT_AUTH_AGENT_SECRET="your-agent-secret"
+# Registry and agent configuration
+AUTHED_REGISTRY_URL="https://api.getauthed.dev"
+AUTHED_AGENT_ID="your-agent-id"
+AUTHED_AGENT_SECRET="your-agent-secret"
+
+# Keys for signing and verifying requests
+AUTHED_PRIVATE_KEY="your-private-key"
+AUTHED_PUBLIC_KEY="your-public-key"
 ```
 
-## 📚 Documentation
+## Documentation
 
-<table>
-<tr>
-<td width="25%">
-<a href="https://docs.getauthed.dev/what-is-authed">
-🎓 Core Concepts
-</a>
-</td>
-<td width="25%">
-<a href="https://docs.getauthed.dev/capabilities">
-🎯 Use Cases
-</a>
-</td>
-<td width="25%">
-<a href="https://docs.getauthed.dev/sdk-guide">
-📖 SDK Guide
-</a>
-</td>
-<td width="25%">
-<a href="https://docs.getauthed.dev/cli-tools">
-💻 CLI Reference
-</a>
-</td>
-</tr>
-</table>
+For more detailed documentation, visit our [official documentation](https://docs.getauthed.dev).
 
-## ⚠️ Security Note
+## Support
 
-Never commit agent secrets or provider credentials to version control. Use environment variables or secure secret management solutions in production.
+For support, contact wojciech@getauthed.dev
 
-## 🤝 Contributing
+## Security Note
 
-We love contributions! Check out our [Contributing Guide](CONTRIBUTING.md) to get started.
-
-<div align="center">
-
-Made with ❤️ for the AI Agent ecosystem
-
-</div>
+Remember to never commit agent secrets or provider credentials to version control. Use environment variables or secure secret management solutions in production.
