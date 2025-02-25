@@ -22,7 +22,6 @@
             "pages": [
               "what-is-authed",
               "quickstart",
-              "capabilities",
               "sdk-setup",
               "cli-tools",
               "roadmap"
