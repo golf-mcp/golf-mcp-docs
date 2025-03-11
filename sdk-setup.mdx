@@ -10,13 +10,32 @@ Install the Authed SDK using pip:
 ```bash
 pip install authed
 ```
+
 ## Basic setup
+
+The easiest way to get started is to use our `authed init setup` command, which will:
+- Generate a secure key pair for your agent
+- Create a new agent under your provider
+- Set up your environment variables automatically
+
+```bash
+authed init setup --provider-id "your-provider-id" --provider-secret "your-provider-secret"
+```
 
 ### Initialize the SDK
 
-```python
-from client.sdk import Authed
+After running the setup command, you can initialize the SDK using environment variables:
 
+```python
+from authed import Authed
+
+# Initialize from environment variables (recommended)
+auth = Authed.from_env()
+```
+
+If you need more control, you can also initialize explicitly:
+
+```python
 # Initialize with explicit credentials
 auth = Authed.initialize(
     registry_url="https://api.getauthed.dev",
@@ -25,14 +44,11 @@ auth = Authed.initialize(
     private_key="your-private-key",
     public_key="your-public-key"
 )
-
-# Or initialize from environment variables
-auth = Authed.from_env()
 ```
 
 ### Environment Variables
 
-The SDK supports the following environment variables:
+The SDK uses these environment variables (automatically configured by `authed init setup`):
 
 | Variable | Required | Description |
 |----------|----------|-------------|

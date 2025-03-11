@@ -22,9 +22,13 @@ description: 'Get started with authed in minutes'
 
 ## Getting started
 
+Get up and running with Authed in three simple steps:
+
 <Steps>
-  <Step title="Register as a provider">
-    Before installing authed, you'll need to register as a provider:
+  <Step title="Register as a Provider">
+    Head over to [getauthed.dev](https://getauthed.dev) and create an account. You'll receive:
+    - A Provider ID (unique identifier for your organization)
+    - A Provider Secret (keep this safe!)
     
     <Card
       title="Register now"
@@ -33,50 +37,29 @@ description: 'Get started with authed in minutes'
     >
       Create a provider account to start managing agents
     </Card>
-    
-    Save your provider ID and secret - you'll need these for the next steps.
   </Step>
 
-  <Step title="Install authed">
+  <Step title="Install the SDK">
     Install using pip:
     ```bash
     pip install authed
     ```
   </Step>
 
-  <Step title="Generate keypair">
-    Generate a keypair for secure agent communication:
+  <Step title="Initialize Your First Agent">
     ```bash
-    authed keys generate --output agent_keys.json
+    # This command will:
+    # - Generate a secure key pair for your agent
+    # - Create a new agent under your provider
+    # - Set up your .env with all required configuration
+    authed init setup --provider-id "your-provider-id" --provider-secret "your-provider-secret"
     ```
-    Save this file securely - you'll need these keys for authentication. See our [CLI documentation](/cli-tools#key-management) for more details.
-  </Step>
-
-  <Step title="Initialize configuration">
-    Set up your authentication details:
-    ```bash
-    authed init config
-    ```
-    This will prompt you for:
-    - Registry URL (our hosted registry: https://api.getauthed.dev)
-    - Provider ID
-    - Provider secret
-
-  </Step>
-
-  <Step title="Create your first agent">
-    ```bash
-    authed agents create --name my-first-agent
-    ```
-    Save the returned agent ID and secret - you'll need these for authentication.
   </Step>
 </Steps>
 
 ## Basic integration
 
-### FastAPI example
-
-Here's a minimal example of integrating Authed with FastAPI:
+Here's a minimal example using FastAPI:
 
 ```python
 from fastapi import FastAPI, Request
@@ -85,14 +68,8 @@ import httpx
 
 app = FastAPI()
 
-# Initialize Authed with keys
-auth = Authed.initialize(
-    registry_url="https://api.getauthed.dev",
-    agent_id="your-agent-id",
-    agent_secret="your-agent-secret",
-    private_key="your-private-key",
-    public_key="your-public-key"
-)
+# Initialize Authed from environment variables (configured by `authed init setup`)
+auth = Authed.from_env()
 
 # Protected endpoint
 @app.post("/secure-endpoint")
@@ -117,11 +94,9 @@ async def call_other_agent():
   For brevity, this example shows keys as strings. In practice, you should load them from your environment or key files.
 </Note>
 
-## Environment setup
+The `authed init setup` command will automatically configure your environment variables, but here's what gets set up:
 
-You can configure Authed using environment variables in your `.env` file:
-
-```bash:.env
+```bash
 # Registry and agent configuration
 AUTHED_REGISTRY_URL="https://api.getauthed.dev"
 AUTHED_AGENT_ID="your-agent-id"
@@ -132,29 +107,7 @@ AUTHED_PRIVATE_KEY="your-private-key"
 AUTHED_PUBLIC_KEY="your-public-key"
 ```
 
-There are several ways to initialize the SDK:
-
-```python
-# Will use AUTHED_* environment variables if they exist
-auth = Authed.from_env()
-
-# Option 2: Load keys from file and initialize explicitly
-def load_keys(keys_file: str = "agent_keys.json"):
-    with open(keys_file) as f:
-        keys = json.load(f)
-    return keys["public_key"], keys["private_key"]
-    
-public_key, private_key = load_keys()
-auth = Authed.initialize(
-    registry_url=os.getenv("AUTHED_REGISTRY_URL"),
-    agent_id=os.getenv("AUTHED_AGENT_ID"),
-    agent_secret=os.getenv("AUTHED_AGENT_SECRET"),
-    private_key=private_key,
-    public_key=public_key
-)
-```
-
-## Next steps
+## Next Steps
 
 <CardGroup cols={2}>
   <Card
@@ -184,6 +137,13 @@ auth = Authed.initialize(
     href="/cli-tools"
   >
     Learn about all available CLI commands
+  </Card>
+  <Card
+    title="Platform Guide"
+    icon="browser"
+    href="/platform"
+  >
+    Manage your agents through our web interface
   </Card>
 </CardGroup>
 

@@ -15,25 +15,24 @@ pip install authed
 
 ## Global configuration
 
-The CLI can be configured in two ways (in order of precedence):
-1. Command line arguments
-2. Environment variables
-
-### Environment variables
+The fastest way to get started is using our setup command:
 
 ```bash
-AUTHED_REGISTRY_URL="https://api.getauthed.dev"
-AUTHED_PROVIDER_ID="<your-provider-id>"
-AUTHED_PROVIDER_SECRET="<your-provider-secret>"
+authed init setup --provider-id "your-provider-id" --provider-secret "your-provider-secret"
 ```
+
+This command will:
+- Generate a secure key pair for your agent
+- Create a new agent under your provider
+- Set up your environment variables automatically
 
 ## Commands
 
-### Initialize configuration
+### Initialize and Setup
 
-Configure CLI:
+Complete setup (recommended):
 ```bash
-authed init config
+authed init setup --provider-id <PROVIDER_ID> --provider-secret <PROVIDER_SECRET>
 ```
 
 Show current config:
