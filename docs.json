@@ -25,6 +25,7 @@
               "platform",
               "sdk-setup",
               "cli-tools",
+              "channels",
               "roadmap"
             ]
           }
