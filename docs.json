@@ -26,6 +26,7 @@
               "sdk-setup",
               "cli-tools",
               "channels",
+              "mcp-integration",
               "roadmap"
             ]
           }
