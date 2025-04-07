@@ -13,14 +13,47 @@ pip install authed
 
 ## Basic setup
 
-The easiest way to get started is to use our `authed init setup` command, which will:
-- Generate a secure key pair for your agent
-- Create a new agent under your provider
-- Set up your environment variables automatically
+The easiest way to get started is to use our `authed init setup` command, which offers two modes:
+
+### 1. Unclaimed Provider (Limited Capabilities)
 
 ```bash
-authed init setup --provider-id "your-provider-id" --provider-secret "your-provider-secret"
+authed init setup
 ```
+
+This will:
+- Create a new unclaimed provider
+- Set up a default agent
+- Generate a secure key pair in PEM format
+- Create `.env` with all credentials properly formatted
+- Limited to 3 agents, no logs
+- Add `.env` to `.gitignore` automatically
+
+### 2. Claimed Provider (Full Capabilities)
+
+```bash
+authed init setup --provider-id "your-id" --provider-secret "your-secret"
+```
+
+This will:
+- Use your existing claimed provider
+- Set up a default agent
+- Validate existing key pair or generate new one if needed
+- Update `.env` with all credentials in proper format
+- Enable full capabilities (unlimited agents, logs)
+
+### Claiming a Provider
+
+To get full capabilities:
+1. Visit [getauthed.dev](https://getauthed.dev/)
+2. Sign up or log in to your account
+3. Follow the onboarding process to claim your provider
+4. Use the provided credentials with `authed init setup`
+
+Once claimed, your provider gains:
+- Unlimited agent creation
+- Access to logs and analytics
+- Advanced management features
 
 ### Initialize the SDK
 
@@ -53,10 +86,17 @@ The SDK uses these environment variables (automatically configured by `authed in
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `AUTHED_REGISTRY_URL` | Yes | Registry URL |
+| `AUTHED_PROVIDER_ID` | Yes | Provider ID |
+| `AUTHED_PROVIDER_SECRET` | Yes | Provider secret |
 | `AUTHED_AGENT_ID` | For outgoing | Agent ID for requests |
 | `AUTHED_AGENT_SECRET` | For outgoing | Agent secret |
 | `AUTHED_PRIVATE_KEY` | For outgoing | Private key for signing |
 | `AUTHED_PUBLIC_KEY` | For incoming | Public key for verification |
+
+The command automatically:
+- Validates key pairs for proper PEM format and headers/footers
+- Ensures proper quoting of environment variables in `.env`
+- Preserves existing environment variables not related to Authed
 
 ## Request authentication
 
@@ -64,13 +104,13 @@ The SDK uses these environment variables (automatically configured by `authed in
 
 ```python
 from fastapi import FastAPI, Request
-from agent_auth_client import verify_fastapi
+from authed import verify_fastapi
 
 app = FastAPI()
 
 # Required authentication
 @app.get("/protected")
-@verify_fastapi()
+@verify_fastapi
 async def protected_endpoint(request: Request):
     return {"message": "This endpoint requires authentication"}
 ```
@@ -78,7 +118,7 @@ async def protected_endpoint(request: Request):
 ### Making authenticated requests
 
 ```python
-from agent_auth_client import protect_httpx, protect_requests
+from authed import protect_httpx, protect_requests
 import httpx
 import requests
 
@@ -109,7 +149,7 @@ def make_sync_request():
 
 ```python
 @app.get("/chain-request")
-@verify_fastapi()  # Verify incoming requests
+@verify_fastapi  # Verify incoming requests
 @protect_httpx()   # Protect outgoing requests
 async def chain_request(request: Request):
     async with httpx.AsyncClient() as client:
@@ -127,8 +167,8 @@ async def chain_request(request: Request):
 
 <AccordionGroup>
   <Accordion icon="circle-xmark" title="Client not registered">
-    - Verify that the SDK is initialized with valid provider ID
-    - Check if the agent registration was successful
+    - Verify that you used the correct provider ID and secret during setup
+    - Check if the agent was created successfully using `authed agents list`
   </Accordion>
   
   <Accordion icon="triangle-exclamation" title="Token verification failed">

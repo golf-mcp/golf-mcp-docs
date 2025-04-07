@@ -22,23 +22,9 @@ description: 'Get started with authed in minutes'
 
 ## Getting started
 
-Get up and running with Authed in three simple steps:
+Get up and running with Authed in just two simple steps:
 
 <Steps>
-  <Step title="Register as a Provider">
-    Head over to [getauthed.dev](https://getauthed.dev) and create an account. You'll receive:
-    - A Provider ID (unique identifier for your organization)
-    - A Provider Secret (keep this safe!)
-    
-    <Card
-      title="Register now"
-      icon="user-plus"
-      href="https://getauthed.dev/"
-    >
-      Create a provider account to start managing agents
-    </Card>
-  </Step>
-
   <Step title="Install the SDK">
     Install using pip:
     ```bash
@@ -48,14 +34,23 @@ Get up and running with Authed in three simple steps:
 
   <Step title="Initialize Your First Agent">
     ```bash
-    # This command will:
-    # - Generate a secure key pair for your agent
-    # - Create a new agent under your provider
-    # - Set up your .env with all required configuration
+    authed init setup
+    ```
+    
+    Or with a claimed provider:
+    ```bash
     authed init setup --provider-id "your-provider-id" --provider-secret "your-provider-secret"
     ```
+    
+    This command will:
+    - Create a new unclaimed provider (or use existing credentials)
+    - Set up a default agent
+    - Generate a secure key pair
+    - Create .env with all required configuration including provider ID and secret
   </Step>
 </Steps>
+
+That's it! You're ready to use Authed in your applications.
 
 ## Basic integration
 
@@ -97,8 +92,12 @@ async def call_other_agent():
 The `authed init setup` command will automatically configure your environment variables, but here's what gets set up:
 
 ```bash
-# Registry and agent configuration
+# Registry and provider configuration
 AUTHED_REGISTRY_URL="https://api.getauthed.dev"
+AUTHED_PROVIDER_ID="your-provider-id"
+AUTHED_PROVIDER_SECRET="your-provider-secret"
+
+# Agent configuration
 AUTHED_AGENT_ID="your-agent-id"
 AUTHED_AGENT_SECRET="your-agent-secret"
 
@@ -116,13 +115,6 @@ AUTHED_PUBLIC_KEY="your-public-key"
     href="/what-is-authed"
   >
     Learn about Authed's core concepts and architecture
-  </Card>
-  <Card
-    title="Use cases"
-    icon="lightbulb"
-    href="/capabilities"
-  >
-    Explore different ways to use Authed in your applications
   </Card>
   <Card
     title="SDK guide"

@@ -13,24 +13,60 @@ pip install authed
   Parameters in [square brackets] are optional. All other parameters are required.
 </Note>
 
-## Global configuration
+## Getting Started
 
-The fastest way to get started is using our setup command:
+The fastest way to get started is using our `authed init setup` command, which offers two modes:
+
+### 1. Unclaimed Provider (Limited Capabilities)
 
 ```bash
-authed init setup --provider-id "your-provider-id" --provider-secret "your-provider-secret"
+authed init setup
 ```
 
-This command will:
-- Generate a secure key pair for your agent
-- Create a new agent under your provider
-- Set up your environment variables automatically
+This will:
+- Create a new unclaimed provider
+- Set up a default agent
+- Generate a secure key pair in PEM format
+- Create `.env` with all credentials properly formatted
+- Limited to 3 agents, no logs
+- Add `.env` to `.gitignore` automatically
+
+### 2. Claimed Provider (Full Capabilities)
+
+```bash
+authed init setup --provider-id "your-id" --provider-secret "your-secret"
+```
+
+This will:
+- Use your existing claimed provider
+- Set up a default agent
+- Validate existing key pair or generate new one if needed
+- Update `.env` with all credentials in proper format
+- Enable full capabilities (unlimited agents, logs)
+
+### Claiming a Provider
+
+To get full capabilities:
+1. Visit [getauthed.dev](https://getauthed.dev/)
+2. Sign up or log in to your account
+3. Follow the onboarding process to claim your provider
+4. Use the provided credentials with `authed init setup`
+
+Once claimed, your provider gains:
+- Unlimited agent creation
+- Access to logs and analytics
+- Advanced management features
 
 ## Commands
 
 ### Initialize and Setup
 
-Complete setup (recommended):
+Complete setup (unclaimed provider):
+```bash
+authed init setup
+```
+
+Complete setup (claimed provider):
 ```bash
 authed init setup --provider-id <PROVIDER_ID> --provider-secret <PROVIDER_SECRET>
 ```
@@ -45,6 +81,57 @@ Clear config (--force skips confirmation):
 authed init clear [--force]
 ```
 
+### Key Management
+
+#### Generate Keys
+```bash
+authed keys generate
+```
+Generates a new key pair and displays them in the terminal. If you have a `.env` file, it will also update the keys there.
+
+Output shows:
+- Generated public and private keys in PEM format
+- Confirmation if keys were updated in `.env`
+- Reminder to add `.env` to `.gitignore`
+
+#### Validate Keys
+```bash
+authed keys validate
+```
+Checks if your current key pair is valid. Looks for keys in:
+1. Command line arguments (if provided)
+2. `.env` file
+3. Environment variables
+
+Output:
+- ✅ Success: Keys are valid and properly formatted
+- ❌ Error: Shows what's wrong (missing keys, invalid format, etc.)
+
+#### Examples
+
+Generate new keys:
+```bash
+$ authed keys generate
+Generated Keys:
+Public Key:
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A...
+-----END PUBLIC KEY-----
+
+Private Key: (keep this secure!)
+-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCAQ...
+-----END PRIVATE KEY-----
+
+✅ Updated keys in .env file
+```
+
+Validate existing keys:
+```bash
+$ authed keys validate
+✅ Key pair is valid
+```
+
 ### Agent management
 
 List agents:
@@ -54,7 +141,7 @@ authed agents list [--output <FILE>]
 
 Create agent:
 ```bash
-authed agents create --name <AGENT_NAME> [--key-file <KEY_FILE>]
+authed agents create --name <AGENT_NAME>
 ```
 
 Get agent info:
@@ -65,23 +152,6 @@ authed agents info <AGENT_ID>
 Delete agent (--force skips confirmation):
 ```bash
 authed agents delete <AGENT_ID> [--force]
-```
-
-### Key management
-
-Generate keypair:
-```bash
-authed keys generate [--output <FILE>]
-```
-
-Show public key:
-```bash
-authed keys show-public <KEY_FILE>
-```
-
-Show private key (--force required as safety measure):
-```bash
-authed keys show-private <KEY_FILE> --force
 ```
 
 ### Permission management
@@ -120,7 +190,7 @@ authed permissions clear <AGENT_ID> [--force]
 
 ### Log management
 
-Stream logs:
+Stream logs (claimed providers only):
 ```bash
 authed logs stream \
   --agent-id <AGENT_ID> \
@@ -128,7 +198,7 @@ authed logs stream \
   [--output <FILE>]
 ```
 
-Fetch logs:
+Fetch logs (claimed providers only):
 ```bash
 authed logs fetch \
   --agent-id <AGENT_ID> \
@@ -141,19 +211,24 @@ authed logs fetch \
 
 ### Setting up a new agent
 
-1. Generate keys:
+The recommended way:
 ```bash
-authed keys generate --output agent_keys.json
+authed init setup
 ```
 
-2. Create agent:
+Or with a claimed provider:
 ```bash
-authed agents create \
-  --name "my-agent" \
-  --key-file agent_keys.json
+authed init setup --provider-id <PROVIDER_ID> --provider-secret <PROVIDER_SECRET>
 ```
 
-3. Verify creation:
+Alternatively, you can do it step by step:
+
+1. Create agent:
+```bash
+authed agents create --name "my-agent"
+```
+
+2. Verify creation:
 ```bash
 authed agents info <AGENT_ID>
 ```
