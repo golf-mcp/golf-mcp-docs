@@ -1,0 +1,56 @@
+---
+title: 'Authed MCP Gateway'
+description: 'Seamless, scalable, and managed gateway solution for Model Control Protocol (MCP) interactions'
+---
+
+# Authed MCP Gateway: Product Overview
+
+Authed provides a seamless, scalable, and managed gateway solution for integrating and orchestrating MCP (Model Control Protocol) interactions between your applications and backend AI model services.
+
+![Authed MCP Gateway Architecture](/images/image.png)
+
+## What Authed MCP Gateway Does
+
+### Session Management
+- Client separation ensuring isolated sessions
+- Persistent session tracking backed by Redis
+- Transparent session lifecycle management
+
+### Supported Transports
+- HTTP/SSE for real-time event streaming
+- HTTP Streamable for seamless continuous communication
+
+### Customizable Endpoint
+- Easily deployable MCP endpoint on your own domain (e.g., `mcp.yourdomain.com`)
+
+## What Clients See
+
+- Simple and reliable connection setup via HTTP/SSE
+- Transparent session management with minimal client-side handling
+- Robust and continuous streaming interactions
+
+## What You Get (Observability & Benefits)
+
+- **Monitoring:** Real-time visibility through comprehensive Prometheus-compatible metrics and structured logging
+- **Usage Tracking:** Detailed analytics to monitor client usage
+- **Billing Integration:** Built-in monetization features and detailed consumption tracking
+- **Custom Rate Limits:** Easily configurable client-specific rate limiting to ensure fair usage and system stability
+
+## Deployment Overview
+
+- Requires Redis for session persistence
+- Lightweight Docker container deployment
+- Kubernetes-ready for scalable orchestration
+
+## Why Choose Authed MCP Gateway?
+
+- **Simplicity:** Abstracts complex protocol handling and session orchestration, enabling faster integration
+- **Robustness:** Ensures reliable communication with backend AI services, minimizing downtime
+- **Scalability:** Easily handles growth and dynamic scaling requirements without architectural changes
+- **Visibility:** Provides comprehensive metrics, observability, and custom billing capabilities out-of-the-box
+
+Authed MCP Gateway empowers your applications with a resilient, scalable, and transparent connection to AI backend services, streamlining integration and enhancing operational efficiency.
+
+## Support
+
+For more information or to discuss your specific needs, contact our team at [founders@getauthed.dev](mailto:founders@getauthed.dev).
