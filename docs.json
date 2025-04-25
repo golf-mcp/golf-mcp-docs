@@ -20,14 +20,7 @@
           {
             "group": "Getting Started",
             "pages": [
-              "what-is-authed",
-              "quickstart",
-              "platform",
-              "sdk-setup",
-              "cli-tools",
-              "channels",
-              "mcp-gateway",
-              "roadmap"
+              "mcp-gateway"
             ]
           }
         ]
@@ -37,7 +30,7 @@
       "anchors": [
         {
           "anchor": "GitHub",
-          "href": "https://github.com/authed-dev/authed",
+          "href": "https://github.com/authed-dev",
           "icon": "github"
         }
       ]
@@ -47,13 +40,13 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:wojciech@getauthed.dev"
+        "href": "mailto:founders@getauthed.dev"
       }
     ]
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/yourusername/authed"
+      "github": "https://github.com/authed-dev"
     }
   }
 }
