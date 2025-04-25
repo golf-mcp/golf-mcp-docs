@@ -1,32 +1,32 @@
 ---
-title: 'What is authed MCP'
+title: 'What is Authed MCP Gateway?'
 description: 'Seamless, scalable, and managed gateway solution for Model Control Protocol (MCP) interactions'
 ---
 
-# Authed MCP Gateway: Product Overview
+# Product overview
 
 Authed provides a seamless, scalable, and managed gateway solution for integrating and orchestrating MCP (Model Control Protocol) interactions between your applications and backend AI model services. As AI agents become the dominant interface for applications, having a reliable, secure, and observable MCP server becomes essential.
 
 ![Authed MCP Gateway Architecture](/images/image.png)
 
-## What Authed MCP Gateway Does
+## What Authed MCP Gateway does
 
-### Session Management
+### Session management
 
 Authed MCP Gateway delivers robust session management capabilities that ensure each client interaction remains isolated and secure. Our system maintains persistent session tracking backed by Redis, allowing for reliable state management even through service restarts or network interruptions. The gateway handles the entire session lifecycle transparently, freeing your developers from implementing complex session handling logic.
 
-### Supported Transports
+### Supported transports
 
 The gateway supports multiple transport protocols to accommodate various client needs:
 
 - **HTTP/SSE (Server-Sent Events)** - Provides real-time event streaming from your MCP services to clients, enabling immediate updates and notifications
 - **HTTP Streamable** - Ensures seamless continuous communication for more complex interactions, maintaining low latency connections while handling backpressure and reconnection scenarios automatically
 
-### Customizable Endpoint
+### Customizable endpoint
 
 Deploy the MCP Gateway on your own domain (e.g., `mcp.yourdomain.com`) for a seamless branded experience. This approach allows you to maintain your brand identity while leveraging our powerful gateway infrastructure. The customizable endpoint integrates smoothly with your existing systems and security policies, providing flexibility without compromising on control.
 
-## What Clients See
+## What clients see
 
 From the client perspective, Authed MCP Gateway offers a dramatically simplified integration experience. Clients connect through straightforward HTTP/SSE protocols, which are widely supported across platforms and environments. The gateway abstracts away the complexities of session management, requiring minimal client-side code to maintain connections. This results in robust and continuous streaming interactions that remain stable even through network fluctuations or service scaling events.
 
@@ -36,27 +36,26 @@ From the client perspective, Authed MCP Gateway offers a dramatically simplified
 
 Gain real-time visibility into your MCP interactions through comprehensive Prometheus-compatible metrics and structured logging. The gateway provides detailed information about connection rates, message throughput, error patterns, and latency metrics. This observability allows you to proactively identify issues, optimize performance, and ensure reliable service delivery to your clients.
 
-### Usage Tracking
+### Usage tracking
 
 Understand how clients interact with your MCP services through detailed analytics. The gateway tracks usage patterns across different clients, endpoints, and time periods, giving you actionable insights into service utilization. These analytics can help you identify popular features, understand client behaviors, and make data-driven decisions about future development priorities.
 
-### Billing Integration
+### Billing integration
 
 The gateway includes built-in monetization features that make it easy to implement usage-based pricing for your MCP services. Detailed consumption tracking captures the metrics most relevant to your business model, whether that's request counts, bandwidth usage, or custom transaction types. This data integrates with your billing systems to enable transparent, accurate invoicing for your services.
 
-### Custom Rate Limits
+### Custom rate limits
 
 Protect your backend services and ensure fair usage with configurable client-specific rate limiting. The gateway allows you to define and enforce different limits for different clients or tiers of service, preventing any single client from monopolizing resources. These limits can be adjusted dynamically, allowing you to respond to changing usage patterns or business requirements without disrupting service.
 
-## Deployment Overview
+## Deployment overview
 
 Authed MCP Gateway is designed for flexible deployment in modern infrastructure environments:
 
-- **Redis Required** - For reliable session persistence and state management
-- **Lightweight Docker Container** - Minimizes resource requirements while maintaining high performance
-- **Kubernetes-Ready** - Supports scalable orchestration for high-availability production environments
+- **Redisd** - For reliable session persistence and state management
+- **Lightweight Docker container** - Minimizes resource requirements while maintaining high performance
 
-## Why Choose Authed MCP Gateway?
+## Why Authed MCP Gateway?
 
 ### Simplicity
 
