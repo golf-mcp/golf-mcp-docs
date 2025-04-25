@@ -5,51 +5,81 @@ description: 'Seamless, scalable, and managed gateway solution for Model Control
 
 # Authed MCP Gateway: Product Overview
 
-Authed provides a seamless, scalable, and managed gateway solution for integrating and orchestrating MCP (Model Control Protocol) interactions between your applications and backend AI model services.
+Authed provides a seamless, scalable, and managed gateway solution for integrating and orchestrating MCP (Model Control Protocol) interactions between your applications and backend AI model services. As AI agents become the dominant interface for applications, having a reliable, secure, and observable MCP server becomes essential.
 
 ![Authed MCP Gateway Architecture](/images/image.png)
 
 ## What Authed MCP Gateway Does
 
 ### Session Management
-- Client separation ensuring isolated sessions
-- Persistent session tracking backed by Redis
-- Transparent session lifecycle management
+
+Authed MCP Gateway delivers robust session management capabilities that ensure each client interaction remains isolated and secure. Our system maintains persistent session tracking backed by Redis, allowing for reliable state management even through service restarts or network interruptions. The gateway handles the entire session lifecycle transparently, freeing your developers from implementing complex session handling logic.
 
 ### Supported Transports
-- HTTP/SSE for real-time event streaming
-- HTTP Streamable for seamless continuous communication
+
+The gateway supports multiple transport protocols to accommodate various client needs:
+
+- **HTTP/SSE (Server-Sent Events)** - Provides real-time event streaming from your MCP services to clients, enabling immediate updates and notifications
+- **HTTP Streamable** - Ensures seamless continuous communication for more complex interactions, maintaining low latency connections while handling backpressure and reconnection scenarios automatically
 
 ### Customizable Endpoint
-- Easily deployable MCP endpoint on your own domain (e.g., `mcp.yourdomain.com`)
+
+Deploy the MCP Gateway on your own domain (e.g., `mcp.yourdomain.com`) for a seamless branded experience. This approach allows you to maintain your brand identity while leveraging our powerful gateway infrastructure. The customizable endpoint integrates smoothly with your existing systems and security policies, providing flexibility without compromising on control.
 
 ## What Clients See
 
-- Simple and reliable connection setup via HTTP/SSE
-- Transparent session management with minimal client-side handling
-- Robust and continuous streaming interactions
+From the client perspective, Authed MCP Gateway offers a dramatically simplified integration experience. Clients connect through straightforward HTTP/SSE protocols, which are widely supported across platforms and environments. The gateway abstracts away the complexities of session management, requiring minimal client-side code to maintain connections. This results in robust and continuous streaming interactions that remain stable even through network fluctuations or service scaling events.
 
 ## What You Get (Observability & Benefits)
 
-- **Monitoring:** Real-time visibility through comprehensive Prometheus-compatible metrics and structured logging
-- **Usage Tracking:** Detailed analytics to monitor client usage
-- **Billing Integration:** Built-in monetization features and detailed consumption tracking
-- **Custom Rate Limits:** Easily configurable client-specific rate limiting to ensure fair usage and system stability
+### Monitoring
+
+Gain real-time visibility into your MCP interactions through comprehensive Prometheus-compatible metrics and structured logging. The gateway provides detailed information about connection rates, message throughput, error patterns, and latency metrics. This observability allows you to proactively identify issues, optimize performance, and ensure reliable service delivery to your clients.
+
+### Usage Tracking
+
+Understand how clients interact with your MCP services through detailed analytics. The gateway tracks usage patterns across different clients, endpoints, and time periods, giving you actionable insights into service utilization. These analytics can help you identify popular features, understand client behaviors, and make data-driven decisions about future development priorities.
+
+### Billing Integration
+
+The gateway includes built-in monetization features that make it easy to implement usage-based pricing for your MCP services. Detailed consumption tracking captures the metrics most relevant to your business model, whether that's request counts, bandwidth usage, or custom transaction types. This data integrates with your billing systems to enable transparent, accurate invoicing for your services.
+
+### Custom Rate Limits
+
+Protect your backend services and ensure fair usage with configurable client-specific rate limiting. The gateway allows you to define and enforce different limits for different clients or tiers of service, preventing any single client from monopolizing resources. These limits can be adjusted dynamically, allowing you to respond to changing usage patterns or business requirements without disrupting service.
 
 ## Deployment Overview
 
-- Requires Redis for session persistence
-- Lightweight Docker container deployment
-- Kubernetes-ready for scalable orchestration
+Authed MCP Gateway is designed for flexible deployment in modern infrastructure environments:
+
+- **Redis Required** - For reliable session persistence and state management
+- **Lightweight Docker Container** - Minimizes resource requirements while maintaining high performance
+- **Kubernetes-Ready** - Supports scalable orchestration for high-availability production environments
 
 ## Why Choose Authed MCP Gateway?
 
-- **Simplicity:** Abstracts complex protocol handling and session orchestration, enabling faster integration
-- **Robustness:** Ensures reliable communication with backend AI services, minimizing downtime
-- **Scalability:** Easily handles growth and dynamic scaling requirements without architectural changes
-- **Visibility:** Provides comprehensive metrics, observability, and custom billing capabilities out-of-the-box
+### Simplicity
 
-Authed MCP Gateway empowers your applications with a resilient, scalable, and transparent connection to AI backend services, streamlining integration and enhancing operational efficiency.
+Authed MCP Gateway abstracts away the complex details of protocol handling and session orchestration, allowing your team to focus on building valuable features rather than infrastructure. This simplification enables faster integration with existing systems and reduces the learning curve for developers working with MCP services.
+
+### Robustness
+
+The gateway ensures reliable communication with backend AI services by implementing best practices for error handling, retry logic, and connection management. This robustness minimizes downtime and service interruptions, even in challenging network conditions. The system is designed to recover gracefully from failures, maintaining session state and reconnecting clients automatically whenever possible.
+
+### Scalability
+
+As your user base grows, Authed MCP Gateway scales effortlessly to handle increased demand. The architecture supports dynamic scaling without requiring changes to your application code or client implementations. Whether you're serving a handful of enterprise clients or millions of consumers, the gateway adjusts to your needs, ensuring consistent performance and reliability throughout your growth journey.
+
+### Visibility
+
+The comprehensive metrics, logging, and analytics provided by the gateway give you unprecedented visibility into your MCP operations:
+
+- **Real-Time Metrics** - Track performance and usage patterns as they happen
+- **Structured Logging** - Quickly identify and troubleshoot issues
+- **Custom Dashboards** - Visualize key performance indicators
+- **Usage Reports** - Generate detailed reports for planning and billing
+
+Authed MCP Gateway empowers your applications with a resilient, scalable, and transparent connection to AI backend services, streamlining integration and enhancing operational efficiency. By handling the complex infrastructure requirements of MCP communication, the gateway allows your team to focus on delivering innovative AI experiences to your users.
 
 ## Support
 
