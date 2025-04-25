@@ -1,11 +1,11 @@
 ---
 title: 'What is Authed MCP Gateway?'
-description: 'Seamless, scalable, and managed gateway solution for Model Context Protocol (MCP) interactions'
+description: 'Seamless, self-hosted gateway solution for Model Context Protocol (MCP) interactions'
 ---
 
 # Product overview
 
-Authed provides a seamless, scalable gateway solution for integrating and orchestrating MCP (Model Context Protocol) interactions between your applications and backend AI model services. As AI agents become the dominant interface for applications, having a reliable, secure, and observable MCP server becomes essential.
+Authed provides a seamless, self-hosted gateway solution for integrating and orchestrating MCP (Model Context Protocol) interactions between your applications and backend AI model services. As AI agents become the dominant interface for applications, having a reliable, secure, and observable MCP server becomes essential.
 
 ![Authed MCP Gateway Architecture](/images/image.png)
 
@@ -17,10 +17,19 @@ Authed MCP Gateway delivers robust session management capabilities that ensure e
 
 ### Supported transports
 
-The gateway supports multiple transport protocols to accommodate various client needs:
+Authed MCP Gateway supports both legacy and current MCP specifications for maximum compatibility:
 
-- **HTTP/SSE (Server-Sent Events)**
-- **HTTP Streamable**
+- **HTTP+SSE (Legacy MCP)** - Support for the original MCP specification using HTTP and Server-Sent Events, ensuring compatibility with existing clients and implementations
+- **Streamable HTTP (Current MCP)** - Full support for the latest MCP specification with streamable HTTP, providing improved performance and reliability
+
+This dual support ensures a smooth migration path while allowing you to take advantage of the latest MCP features.
+
+### Deployment overview
+
+Authed MCP Gateway is designed for flexible deployment in modern infrastructure environments:
+
+- **Redis** - For reliable session persistence and state management
+- **Lightweight Docker container** - Minimizes resource requirements while maintaining high performance
 
 ### Customizable endpoint
 
@@ -47,13 +56,6 @@ The gateway includes built-in monetization features that make it easy to impleme
 ### Custom rate limits
 
 Protect your backend services and ensure fair usage with configurable client-specific rate limiting. The gateway allows you to define and enforce different limits for different clients or tiers of service, preventing any single client from monopolizing resources. These limits can be adjusted dynamically, allowing you to respond to changing usage patterns or business requirements without disrupting service.
-
-## Deployment overview
-
-Authed MCP Gateway is designed for flexible deployment in modern infrastructure environments:
-
-- **Redisd** - For reliable session persistence and state management
-- **Lightweight Docker container** - Minimizes resource requirements while maintaining high performance
 
 ## Why Authed MCP Gateway?
 
