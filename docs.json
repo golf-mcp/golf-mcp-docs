@@ -18,22 +18,31 @@
         "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting Started",
+            "group": "Getting started",
             "pages": [
-              "golf-mcp-framework/introduction"
+              "golf-mcp-framework/introduction",
+              "golf-mcp-framework/quickstart"
             ]
           },
           {
-            "group": "GolfMCP Framework",
+            "group": "Core concepts",
             "pages": [
-              "golf-mcp-framework/introduction",
-              "golf-mcp-framework/quickstart",
-              "golf-mcp-framework/cli-commands",
               "golf-mcp-framework/project-structure",
               "golf-mcp-framework/component-specification",
               "golf-mcp-framework/shared-logic-common-py",
+              "golf-mcp-framework/cli-commands"
+            ]
+          },
+          {
+            "group": "Advanced features",
+            "pages": [
               "golf-mcp-framework/pre-build-hook",
-              "golf-mcp-framework/authentication",
+              "golf-mcp-framework/authentication"
+            ]
+          },
+          {
+            "group": "Future",
+            "pages": [
               "golf-mcp-framework/roadmap"
             ]
           }
