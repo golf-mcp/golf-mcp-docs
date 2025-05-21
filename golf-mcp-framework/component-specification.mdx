@@ -1,0 +1,112 @@
+---
+title: 'Component Specification'
+description: 'Learn how to define GolfMCP components (tools, resources, prompts).'
+---
+
+GolfMCP expects your Python component files to follow certain conventions for metadata and function definitions.
+
+### 1. Metadata Source (Description)
+
+The primary source for a component's description is its **module-level docstring**.
+
+```python
+# tools/my_tool.py
+"""This is the description for 'my_tool'.
+It can span multiple lines and will be used by FastMCP.
+"""
+
+# ... rest of the tool code
+```
+
+*   This docstring is **mandatory**. If missing, the build will fail.
+*   The function docstring of the exported function is generally ignored if a module docstring is present. It might be used as a fallback if the module docstring is missing, but relying on this is not recommended.
+
+### 2. Entry Function (`export`)
+
+GolfMCP needs to know which function within your Python file is the main entry point for the component. This is primarily done by assigning the function to a module-level variable named `export`.
+
+```python
+# tools/calculator.py
+"""A simple calculator tool."""
+
+async def add_numbers(a: int, b: int) -> int:
+    return a + b
+
+async def subtract_numbers(a: int, b: int) -> int:
+    return a - b
+
+# 'add_numbers' is the designated tool function
+export = add_numbers
+```
+
+If an `export` variable is not found, GolfMCP build will fail.
+
+### 3. Function Signature Requirements
+
+The signature of your exported function must adhere to certain rules:
+
+*   **Tools:**
+    *   Parameters **must** have type hints (e.g., `param: str`, `count: int`).
+    *   The return value **must** have a type hint (e.g., `-> str`, `-> Dict[str, Any]`).
+    *   Can be `async def` or `def`.
+*   **Resources:**
+    *   If defined as a function, it follows similar rules to tools.
+    *   Resource functions typically do not take arguments unless they are part of a resource template (where arguments come from URI path parameters).
+    *   The URI for the resource is defined by a module-level variable `resource_uri: str`.
+    *   Example: `resource_uri = "data://config"`
+    *   Can also be a simple module-level constant (JSON-serializable).
+*   **Prompts:**
+    *   The function should return either a `str` (which becomes a single user message) or a `List[Dict]`.
+    *   Parameters should have type hints.
+
+**Pydantic for Input/Output Schemas (Tools):**
+
+For tools, Pydantic `BaseModel` is highly recommended for defining complex input argument structures and output shapes, enabling clear schemas and validation for FastMCP.
+
+*   **Input Parameters & Schema:**
+    Tool inputs are **always** defined by the parameters of your exported tool function. These parameters **must** have type hints and descriptions.
+
+    *   **Direct Function Parameters:** You define inputs directly in the tool function's signature.
+        ```python
+        # tools/hello.py
+        """Hello World tool example."""
+        from pydantic import BaseModel
+
+        class Output(BaseModel):
+            message: str
+
+        async def hello(name: str = "World", greeting: str = "Hello") -> Output:
+            # 'name' and 'greeting' are direct input parameters.
+            # Golf's parser creates an inputSchema in the manifest based on these.
+            # FastMCP uses these type hints for runtime validation.
+            return Output(message=f"{greeting}, {name}!")
+        export = hello
+        ```
+
+*   **Output Structure & Schema:**
+    The structure of your tool's output should be defined by its return type hint. It is strongly recommended to use a Pydantic `BaseModel` for this return type to ensure a clear and validated output schema.
+
+    ```python
+    # tools/user_profile_tool.py
+    """Tool to fetch user profile information."""
+    from pydantic import BaseModel
+    from typing import Optional
+
+    class Output(BaseModel): # Explicit Pydantic model for the output
+        user_id: int
+        username: str
+        email: Optional[str]
+        is_active: bool
+
+    async def fetch_user_profile(user_id: int) -> Output:
+        # FastMCP uses the 'UserProfileOutput' return type hint for its
+        # runtime behavior and schema exposure to clients.
+        return UserProfileOutput(
+            user_id=user_id, 
+            username="example_user", 
+            email="user@example.com", 
+            is_active=True
+        )
+
+    export = fetch_user_profile
+    ``` 

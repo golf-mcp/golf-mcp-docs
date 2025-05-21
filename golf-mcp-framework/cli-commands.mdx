@@ -1,0 +1,34 @@
+---
+title: 'Golf CLI Commands'
+description: 'Reference for the GolfMCP command-line interface.'
+---
+
+The `golf` command-line interface is your primary tool for managing GolfMCP projects.
+
+### `golf init`
+
+Initializes a new GolfMCP project directory.
+
+```bash
+golf init <project_name> [options]
+```
+*   **`project_name`**: (Required) The name of the project and the directory to be created.
+*   **`--output-dir <path>`, `-o <path>`**: Specifies a different directory to create the project in. Defaults to a new directory named `project_name` in the current location.
+
+### `golf build <env>`
+
+Builds your GolfMCP project into a runnable MCP Server
+
+```bash
+golf build dev|prod [options]
+```
+*   **`dev`**: Creates a development build. Typically copies the `.env` file from your project root to the output directory (`dist/`) so the server can access environment variables during local development.
+*   **`prod`**: Creates a production build. Environment variables are generally expected to be set in the production environment itself, so `.env` is not copied.
+
+### `golf run`
+
+Runs a previously built GolfMCP server.
+
+```bash
+golf run [options]
+``` 

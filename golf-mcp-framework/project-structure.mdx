@@ -1,0 +1,57 @@
+---
+title: 'Project Structure & Naming'
+description: 'Understand GolfMCP project layout and component naming conventions.'
+---
+
+GolfMCP uses a convention-based project structure.
+
+```
+<project-root>/
+├── .env
+├── golf.json
+├── pre_build.py
+├── prompts/
+│   └── example_prompt.py
+├── resources/
+│   └── example_resource.py
+│   └── sub_category/
+│       └── nested_resource.py
+│       └── common.py
+└── tools/
+    └── example_tool.py
+    └── payments/
+        └── common.py
+        └── get_balance.py
+        └── transaction/
+            └── submit.py
+```
+
+*   **`golf.json`**: The main configuration file (see Configuration section).
+*   **`.env`**: Stores environment variables. Loaded by the built server.
+*   **`pre_build.py`**: Optional script for pre-build tasks, like auth setup.
+*   **`tools/`**: Contains Python files defining your server's tools (callable functions).
+*   **`resources/`**: Contains Python files defining data resources the LLM can read.
+*   **`prompts/`**: Contains Python files defining reusable prompt templates.
+
+### Component Discovery
+
+*   Each `.py` file within `tools/`, `resources/`, or `prompts/` (and their subdirectories) is treated as a single component.
+*   Files named `__init__.py` are ignored for direct component definition but are essential for Python's packaging if you structure your components as modules.
+*   Files named `common.py` are special and used for shared code (see `common.py` section).
+
+### Component ID Derivation
+
+The unique ID for each component (used for registration in FastMCP) is derived from its file path relative to the category directory (`tools`, `resources`, `prompts`).
+
+**Algorithm:**
+Given a component file: `<project-root>/<category>/<p1>/.../<pn>/<filename>.py`
+Let `PathRev = [pn, ..., p1]` (reversed list of parent directories under the category).
+The ID is: `<filename>` + (`"-"` + `"-".join(PathRev)` if `PathRev` is not empty, otherwise `""`)
+
+**Examples:**
+
+*   `tools/hello.py`                 -> ID: `hello`
+*   `tools/payments/transaction/submit.py` -> ID: `submit-transaction-payments`
+*   `resources/weather/current.py`   -> ID: `current-weather`
+
+Filename is taken without the `.py` extension. Case is preserved. ID collisions will result in a build-time error. 

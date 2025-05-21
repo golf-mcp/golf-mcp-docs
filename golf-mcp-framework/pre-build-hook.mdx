@@ -1,0 +1,56 @@
+---
+title: 'Extensibility: pre_build.py Hook'
+description: 'Customize the GolfMCP build process using the pre_build.py script.'
+---
+
+GolfMCP provides an extensibility hook through a `pre_build.py` file located at the root of your project. This Python script is executed by GolfMCP *before* the main build process (parsing components, generating code) begins.
+
+**Purpose:**
+
+*   **Authentication Configuration:** The most common use case is to configure authentication providers and settings.
+*   **Dynamic Configuration:** Programmatically set or modify build settings based on environment or other factors.
+*   **Pre-Build Validation/Checks:** Perform custom validation steps before GolfMCP starts its build.
+
+**How it Works:**
+
+*   GolfMCP executes `pre_build.py` within the context of your project directory.
+*   The script can import modules from the GolfMCP framework itself (e.g., `from golf.auth import ProviderConfig, configure_auth`).
+*   It can interact with a global configuration state that the subsequent build process will use.
+
+**Example (`pre_build.py` for GitHub OAuth):**
+
+```python
+# <project_root>/pre_build.py
+"""Pre-build configuration for setting up GitHub OAuth."""
+
+from golf.auth import ProviderConfig, configure_auth
+
+# Define configuration for the GitHub OAuth provider
+github_provider = ProviderConfig(
+    provider="github",  # A known provider type or 'custom'
+    client_id_env_var="GITHUB_CLIENT_ID", # Env var for Client ID
+    client_secret_env_var="GITHUB_CLIENT_SECRET", # Env var for Client Secret
+    jwt_secret_env_var="JWT_SECRET", # Env var for JWT signing secret
+    authorize_url="https://github.com/login/oauth/authorize",
+    token_url="https://github.com/login/oauth/access_token",
+    userinfo_url="https://api.github.com/user", # Optional, for fetching user info
+    scopes=["read:user", "user:email"], # Scopes to request from GitHub
+    issuer_url="http://127.0.0.1:3000", # Your GolfMCP server's public URL
+    callback_path="/auth/callback",     # The callback path on your GolfMCP server
+    token_expiration=3600               # JWT expiration time in seconds (e.g., 1 hour)
+)
+
+# Configure authentication globally using this provider
+# and specify which scopes are required for authenticated access to the server.
+configure_auth(
+    provider_config=github_provider, # Pass the provider configuration
+    required_scopes=["read:user"]    # Scopes client must have for general access
+)
+
+print("✅ GitHub OAuth configured in pre_build.py")
+```
+
+When `golf build` runs, it will first execute this `pre_build.py`. The `configure_auth` call stores the `github_provider` configuration. The build process then uses this stored configuration to:
+1.  Generate `server.py` with code to initialize the `GolfOAuthProvider` using the specified settings. This generated code will read `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and `JWT_SECRET` from environment variables at *runtime*.
+2.  Copy necessary authentication modules from the GolfMCP installation into the `dist/golf/auth/` directory.
+3.  Set up the required OAuth routes (e.g., `/login`, `/auth/callback`) in the generated `server.py`. 

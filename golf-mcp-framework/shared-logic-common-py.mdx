@@ -1,0 +1,57 @@
+---
+title: 'Shared Logic: common.py'
+description: 'Using common.py files for shared utilities in GolfMCP components.'
+---
+
+Often, multiple components within the same category subdirectory (e.g., several tools under `tools/payments/`) might need to share utility functions, client initializations, or Pydantic models. For this, GolfMCP supports `common.py` files.
+
+*   A file named `common.py` in any subdirectory of `tools/`, `resources/`, or `prompts/` can contain shared code.
+*   Other component files in the *same directory or its subdirectories* can import from this `common.py` using relative imports.
+
+**Example:**
+
+`tools/payments/common.py`:
+```python
+# tools/payments/common.py
+import httpx
+
+# Shared HTTP client for payment operations
+payment_api_client = httpx.AsyncClient(base_url="https://api.payments.example.com")
+
+DEFAULT_CURRENCY = "USD"
+
+class PaymentError(Exception):
+    pass
+```
+
+`tools/payments/charge.py`:
+```python
+# tools/payments/charge.py
+"""Tool to process a payment charge."""
+from pydantic import BaseModel
+from .common import payment_api_client, DEFAULT_CURRENCY, PaymentError # Relative import
+
+class ChargeInput(BaseModel):
+    amount: float
+    card_token: str
+
+class ChargeOutput(BaseModel):
+    success: bool
+    charge_id: str
+
+async def process_charge(input_data: ChargeInput) -> ChargeOutput:
+    try:
+        response = await payment_api_client.post(
+            "/charges",
+            json={"amount": input_data.amount, "token": input_data.card_token, "currency": DEFAULT_CURRENCY}
+        )
+        response.raise_for_status()
+        charge_data = response.json()
+        return ChargeOutput(success=True, charge_id=charge_data["id"])
+    except Exception as e:
+        raise PaymentError(f"Charge failed: {e}")
+
+export = process_charge
+```
+
+The GolfMCP build system understands these relative imports and ensures that the `common.py` modules are correctly packaged and accessible in the final `dist/` output. The `ImportTransformer` in `golf.core.transformer` handles rewriting these imports to be absolute paths relative to the generated `components` directory structure. 

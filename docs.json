@@ -20,7 +20,21 @@
           {
             "group": "Getting Started",
             "pages": [
-              "mcp-gateway"
+              "golf-mcp-framework/introduction"
+            ]
+          },
+          {
+            "group": "GolfMCP Framework",
+            "pages": [
+              "golf-mcp-framework/introduction",
+              "golf-mcp-framework/quickstart",
+              "golf-mcp-framework/cli-commands",
+              "golf-mcp-framework/project-structure",
+              "golf-mcp-framework/component-specification",
+              "golf-mcp-framework/shared-logic-common-py",
+              "golf-mcp-framework/pre-build-hook",
+              "golf-mcp-framework/authentication",
+              "golf-mcp-framework/roadmap"
             ]
           }
         ]
@@ -30,7 +44,7 @@
       "anchors": [
         {
           "anchor": "GitHub",
-          "href": "https://github.com/authed-dev",
+          "href": "https://github.com/golf-mcp",
           "icon": "github"
         }
       ]
@@ -40,13 +54,13 @@
     "links": [
       {
         "label": "Support",
-        "href": "mailto:founders@getauthed.dev"
+        "href": "mailto:founders@golf.dev"
       }
     ]
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/authed-dev"
+      "github": "https://github.com/golf-mcp/golf/tree/main"
     }
   }
 }
