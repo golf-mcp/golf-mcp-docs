@@ -7,17 +7,17 @@ GolfMCP provides an extensibility hook through a `pre_build.py` file located at 
 
 **Purpose:**
 
-*   **Authentication Configuration:** The most common use case is to configure authentication providers and settings.
+*   **Authentication Configuration:** The most common use case is to configure authentication providers and settings (OAuth or API key).
 *   **Dynamic Configuration:** Programmatically set or modify build settings based on environment or other factors.
 *   **Pre-Build Validation/Checks:** Perform custom validation steps before GolfMCP starts its build.
 
 **How it Works:**
 
 *   GolfMCP executes `pre_build.py` within the context of your project directory.
-*   The script can import modules from the GolfMCP framework itself (e.g., `from golf.auth import ProviderConfig, configure_auth`).
+*   The script can import modules from the GolfMCP framework itself (e.g., `from golf.auth import ProviderConfig, configure_auth, configure_api_key`).
 *   It can interact with a global configuration state that the subsequent build process will use.
 
-**Example (`pre_build.py` for GitHub OAuth):**
+**Example 1: OAuth Authentication (GitHub)**
 
 ```python
 # <project_root>/pre_build.py
@@ -50,7 +50,46 @@ configure_auth(
 print("✅ GitHub OAuth configured in pre_build.py")
 ```
 
-When `golf build` runs, it will first execute this `pre_build.py`. The `configure_auth` call stores the `github_provider` configuration. The build process then uses this stored configuration to:
-1.  Generate `server.py` with code to initialize the `GolfOAuthProvider` using the specified settings. This generated code will read `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, and `JWT_SECRET` from environment variables at *runtime*.
+**Example 2: API Key Authentication**
+
+```python
+# <project_root>/pre_build.py
+"""Pre-build configuration for API key authentication."""
+
+from golf.auth import configure_api_key
+
+# Configure to extract API keys from the Authorization header
+# This example strips the "Bearer " prefix from tokens
+configure_api_key(
+    header_name="Authorization",
+    header_prefix="Bearer "  # Will extract "your-token" from "Bearer your-token"
+)
+
+print("✅ API key authentication configured in pre_build.py")
+```
+
+**Example 3: Multiple Authentication Options**
+
+You can configure different authentication methods for different use cases:
+
+```python
+# <project_root>/pre_build.py
+"""Pre-build configuration for multiple authentication methods."""
+
+from golf.auth import configure_api_key
+
+# For simple API key authentication (e.g., OpenAI, Anthropic)
+configure_api_key(
+    header_name="X-API-Key"  # No prefix needed
+)
+
+# You could also add OAuth configuration here if needed
+# configure_auth(provider_config=my_oauth_provider)
+
+print("✅ Authentication configured in pre_build.py")
+```
+
+When `golf build` runs, it will first execute this `pre_build.py`. The configuration calls store the authentication settings. The build process then uses this stored configuration to:
+1.  Generate `server.py` with appropriate authentication middleware and handlers.
 2.  Copy necessary authentication modules from the GolfMCP installation into the `dist/golf/auth/` directory.
-3.  Set up the required OAuth routes (e.g., `/login`, `/auth/callback`) in the generated `server.py`. 
+3.  Set up the required routes and middleware based on the authentication method chosen. 
