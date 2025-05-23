@@ -5,11 +5,6 @@ description: 'Get started with your first GolfMCP project from scratch.'
 
 Let's get you started with your first GolfMCP project from scratch.
 
-### Prerequisites
-
-*   Python 3.10+
-*   Pip (Python package installer)
-
 ### 1. Install GolfMCP
 
 ```bash
@@ -55,7 +50,25 @@ my_awesome_server/
 *   **`tools/`**, **`resources/`**, **`prompts/`**: Directories where you'll define your server's capabilities.
 *   **`pre_build.py`**: An optional script for custom logic before building, often used for authentication setup.
 
-### 3. Create Your First Tool
+### 3. Set Up GitHub OAuth (optional - for the example Tools)
+
+The boilerplate example includes a GitHub user tool that requires OAuth authentication. To make it work:
+
+1. **Create a GitHub OAuth App** by following [GitHub's OAuth App creation guide](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app)
+   
+2. **Configure the OAuth App URLs (for local testing):**
+   - **Homepage URL:** `http://127.0.0.1:3000`
+   - **Authorization callback URL:** `http://127.0.0.1:3000/auth/callback`
+
+3. **Set up environment variables** in your `.env` file:
+   ```bash
+   GITHUB_CLIENT_ID="your-client-id"
+   GITHUB_CLIENT_SECRET="your-client-secret"
+   JWT_SECRET="example-jwt-secret-for-development-only"
+   ```
+   Replace the values above with your actual GitHub OAuth app credentials.
+
+### 4. Create Your First Tool
 
 Let's modify the example "hello" tool. Open `tools/hello.py`:
 
@@ -89,7 +102,7 @@ export = say_hello
 
 We've updated the greeting message and changed the function name to `say_hello`. The `export = say_hello` line is crucial as it tells Golf which function to expose as the tool.
 
-### 4. Build for Development
+### 5. Build for Development
 
 Compile your project for development:
 
@@ -103,7 +116,7 @@ This command:
 *   Creates a `dist/` directory containing the runnable server (`server.py`) and any necessary supporting files (like auth components).
 *   For `dev` builds, it copies your `.env` file to the `dist/` directory, making environment variables available to the server.
 
-### 5. Run Your Server
+### 6. Run Your Server
 
 Execute the built server:
 
@@ -112,3 +125,60 @@ golf run
 ```
 
 Congratulations! You've built and run your first GolfMCP server. 
+
+### 7. Connect to Claude or Cursor
+
+To use your GolfMCP server with client like Claude Desktop, Cursor, Windsurf or any other client we recommend [mcp-remote](https://github.com/geelen/mcp-remote/tree/main) to SSE server.
+
+#### Claude Desktop Configuration
+
+Edit your Claude Desktop configuration file:
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+Add your server configuration:
+```json
+{
+  "mcpServers": {
+    "my-golf-server": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "http://127.0.0.1:3000/sse"
+      ]
+    }
+  }
+}
+```
+
+#### Cursor Configuration
+
+Edit your Cursor configuration file at `~/.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "my-golf-server": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "http://127.0.0.1:3000/sse"
+      ]
+    }
+  }
+}
+```
+
+#### Troubleshooting Authentication Errors
+
+If you encounter authentication errors like:
+```
+Authentication Error
+Token exchange failed: HTTP 400
+```
+
+Clear any locally stored state and tokens:
+```bash
+rm -rf ~/.mcp-auth
+```
+
+Then restart your MCP client and try connecting again. 
