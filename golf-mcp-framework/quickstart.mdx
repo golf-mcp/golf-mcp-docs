@@ -73,34 +73,42 @@ The boilerplate example includes a GitHub user tool that requires OAuth authenti
 Let's modify the example "hello" tool. Open `tools/hello.py`:
 
 ```python
-'''Hello World tool for {{project_name}}.'''
+"""Hello World tool for {{project_name}}."""
 
-from pydantic import BaseModel
+from typing import Annotated
+from pydantic import BaseModel, Field
 
-# Defines the expected output structure for this tool
+
 class Output(BaseModel):
-    '''Response from the hello tool.'''
+    """Response from the hello tool."""
+    
     message: str
 
-# This is the main function for the tool
-async def say_hello(
-    name: str = "World",
-    greeting: str = "Hello"
-) -> Output:
-    '''Say hello to the given name.
 
+async def hello(
+    name: Annotated[str, Field(description="The name of the person to greet")] = "World",
+    greeting: Annotated[str, Field(description="The greeting phrase to use")] = "Hello"
+) -> Output:
+    """Say hello to the given name.
+    
     This is a simple example tool that demonstrates the basic structure
     of a tool implementation in GolfMCP.
-    '''
-    response_message = f"{greeting}, {name}! Welcome to GolfMCP!"
-    print(f"Tool 'say_hello' called with: name='{name}', greeting='{greeting}'")
-    return Output(message=response_message)
+    """
+    # The framework will add a context object automatically
+    # You can log using regular print during development
+    print(f"{greeting} {name}...")
+    
+    # Create and return the response
+    return Output(message=f"{greeting}, {name}!")
 
-# The 'export' variable tells GolfMCP which function is the entry point for this tool
-export = say_hello
+# Designate the entry point function
+export = hello
 ```
 
-We've updated the greeting message and changed the function name to `say_hello`. The `export = say_hello` line is crucial as it tells Golf which function to expose as the tool.
+Key points about this tool:
+- **Parameter Annotations**: We use `Annotated` with `Field` to provide descriptions for each parameter. This helps AI agents understand how to use your tool effectively.
+- **Output Model**: The `Output` class defines the structure of the response using Pydantic.
+- **Export**: The `export = hello` line tells Golf which function to expose as the tool.
 
 ### 5. Build for Development
 
