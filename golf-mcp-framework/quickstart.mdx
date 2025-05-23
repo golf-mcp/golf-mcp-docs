@@ -157,6 +157,10 @@ Congratulations! You've built and run your first GolfMCP server.
 
 To use your GolfMCP server with client like Claude Desktop, Cursor, Windsurf or any other client we recommend [mcp-remote](https://github.com/geelen/mcp-remote/tree/main) to SSE server.
 
+<Note>
+If you configured API key authentication (Option B in Section 3), you'll need to pass the authentication header using the `--header` flag and environment variables as shown in the examples below.
+</Note>
+
 #### Basic Claude Desktop Configuration
 
 Edit your Claude Desktop configuration file:
@@ -178,6 +182,26 @@ Add your server configuration:
 }
 ```
 
+**With API Key Authentication:**
+```json
+{
+  "mcpServers": {
+    "my-golf-server": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "http://127.0.0.1:3000/sse",
+        "--header",
+        "Authorization: Bearer ${GITHUB_TOKEN}"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "ghp_your_github_token_here"
+      }
+    }
+  }
+}
+```
+
 #### Basic Cursor Configuration
 
 Edit your Cursor configuration file at `~/.cursor/mcp.json`:
@@ -190,6 +214,26 @@ Edit your Cursor configuration file at `~/.cursor/mcp.json`:
         "mcp-remote",
         "http://127.0.0.1:3000/sse"
       ]
+    }
+  }
+}
+```
+
+**With API Key Authentication:**
+```json
+{
+  "mcpServers": {
+    "my-golf-server": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "http://127.0.0.1:3000/sse",
+        "--header",
+        "Authorization: Bearer ${GITHUB_TOKEN}"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "ghp_your_github_token_here"
+      }
     }
   }
 }
