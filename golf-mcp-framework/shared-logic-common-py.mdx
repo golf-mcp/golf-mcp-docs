@@ -16,42 +16,69 @@ Often, multiple components within the same category subdirectory (e.g., several 
 import httpx
 
 # Shared HTTP client for payment operations
-payment_api_client = httpx.AsyncClient(base_url="https://api.payments.example.com")
+payment_client = httpx.AsyncClient(base_url="https://api.payments.example.com")
 
 DEFAULT_CURRENCY = "USD"
 
 class PaymentError(Exception):
     pass
+
+# Mock payment processing functions for examples
+async def create_charge(amount: float, token: str, description: str = "") -> dict:
+    # In a real implementation, this would call the payment API
+    return {"id": f"ch_{token[:8]}", "amount": amount, "currency": DEFAULT_CURRENCY}
+
+async def create_refund(charge_id: str, amount: float = None, reason: str = "") -> dict:
+    # In a real implementation, this would call the payment API
+    return {"id": f"re_{charge_id[3:11]}", "charge_id": charge_id, "amount": amount}
 ```
 
 `tools/payments/charge.py`:
 ```python
 # tools/payments/charge.py
 """Tool to process a payment charge."""
-from pydantic import BaseModel
-from .common import payment_api_client, DEFAULT_CURRENCY, PaymentError # Relative import
-
-class ChargeInput(BaseModel):
-    amount: float
-    card_token: str
+from typing import Annotated
+from pydantic import BaseModel, Field
+from .common import payment_client, create_charge, PaymentError
 
 class ChargeOutput(BaseModel):
     success: bool
     charge_id: str
+    message: str
 
-async def process_charge(input_data: ChargeInput) -> ChargeOutput:
+async def charge(
+    amount: Annotated[float, Field(
+        description="Amount to charge in USD",
+        gt=0,  # Must be greater than 0
+        le=10000  # Maximum charge limit
+    )],
+    card_token: Annotated[str, Field(
+        description="Tokenized payment card identifier",
+        pattern=r"^tok_[a-zA-Z0-9]+$"  # Validate token format
+    )],
+    description: Annotated[str, Field(
+        description="Optional payment description",
+        max_length=200
+    )] = ""
+) -> ChargeOutput:
+    """Process a payment charge."""
     try:
-        response = await payment_api_client.post(
-            "/charges",
-            json={"amount": input_data.amount, "token": input_data.card_token, "currency": DEFAULT_CURRENCY}
+        # Use the shared payment client from common.py
+        charge_result = await create_charge(
+            amount=amount,
+            token=card_token,
+            description=description
         )
-        response.raise_for_status()
-        charge_data = response.json()
-        return ChargeOutput(success=True, charge_id=charge_data["id"])
+        
+        return ChargeOutput(
+            success=True,
+            charge_id=charge_result["id"],
+            message=f"Successfully charged ${amount:.2f}"
+        )
     except Exception as e:
         raise PaymentError(f"Charge failed: {e}")
 
-export = process_charge
+export = charge
 ```
 
 The GolfMCP build system understands these relative imports and ensures that the `common.py` modules are correctly packaged and accessible in the final `dist/` output. The `ImportTransformer` in `golf.core.transformer` handles rewriting these imports to be absolute paths relative to the generated `components` directory structure. 
