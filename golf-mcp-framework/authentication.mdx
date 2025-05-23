@@ -1,9 +1,160 @@
 ---
 title: 'Authentication with GolfMCP'
-description: 'Understand GolfMCPs OAuth 2.0 abstraction for FastMCP servers.'
+description: 'Implement OAuth 2.0 and API key authentication in your GolfMCP servers.'
 ---
 
-GolfMCP aims to simplify OAuth 2.0 integration for your FastMCP servers by providing a high-level abstraction. This allows you to configure authentication without needing to implement the `OAuthAuthorizationServerProvider` interface from the MCP SDK manually.
+GolfMCP provides two authentication mechanisms to secure your MCP servers:
+1. **OAuth 2.0** - For user-based authentication with external identity providers
+2. **API Key** - For simple pass-through authentication to upstream APIs
+
+## API Key Authentication
+
+### Overview
+
+Golf provides a simple API key pass-through authentication mechanism that allows MCP servers to extract API keys from request headers and forward them to upstream services. The actual authentication happens at the destination API level, not within the MCP server.
+
+### Configuration
+
+Configure API key extraction in your project's `pre_build.py`:
+
+```python
+from golf.auth import configure_api_key
+
+# Configure which header contains the API key
+configure_api_key(
+    header_name="Authorization",  # Header to extract from
+    header_prefix="Bearer "       # Optional prefix to strip
+)
+```
+
+### How It Works
+
+1. **Middleware**: Golf automatically adds middleware that extracts the API key from incoming request headers
+2. **Context Storage**: The extracted key is stored in a request-scoped context (only exists for the duration of the request)
+3. **Tool Access**: Tools retrieve the API key using `get_api_key()`
+4. **Pass-through**: Tools forward the key to upstream APIs in whatever format they require
+
+### Using in Tools
+
+Tools access the API key with a simple import:
+
+```python
+from golf.auth import get_api_key
+
+async def my_tool():
+    api_key = get_api_key()
+    if not api_key:
+        return {"error": "No API key provided"}
+    
+    # Use the key with your API
+    response = await client.get(
+        "https://api.example.com/endpoint",
+        headers={"Authorization": f"Bearer {api_key}"}
+    )
+```
+
+### Complete Example: GitHub API Tool
+
+Here's a complete example of a GitHub tool using API key authentication:
+
+**pre_build.py**:
+```python
+from golf.auth import configure_api_key
+
+# GitHub expects: Authorization: Bearer ghp_xxxxxxxxxxxx
+configure_api_key(
+    header_name="Authorization",
+    header_prefix="Bearer "
+)
+```
+
+**tools/repos/list.py**:
+```python
+"""List GitHub repositories for a user."""
+
+from typing import Annotated, Optional, Dict, Any, List
+from pydantic import BaseModel, Field
+import httpx
+
+from golf.auth import get_api_key
+
+
+class Output(BaseModel):
+    """List of repositories."""
+    repositories: List[Dict[str, Any]]
+    error: Optional[str] = None
+
+
+async def list(
+    username: Annotated[str, Field(description="GitHub username")]
+) -> Output:
+    """List public repositories for a GitHub user."""
+    # Get the API key from the request context
+    github_token = get_api_key()
+    
+    # Prepare headers - include token if available
+    headers = {
+        "Accept": "application/vnd.github.v3+json",
+        "User-Agent": "My-MCP-Server"
+    }
+    if github_token:
+        headers["Authorization"] = f"Bearer {github_token}"
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"https://api.github.com/users/{username}/repos",
+                headers=headers,
+                timeout=10.0
+            )
+            
+            if response.status_code == 401:
+                return Output(
+                    repositories=[], 
+                    error="Invalid GitHub token"
+                )
+            
+            response.raise_for_status()
+            repos = response.json()
+            
+            return Output(
+                repositories=[{
+                    "name": r["name"],
+                    "stars": r["stargazers_count"]
+                } for r in repos]
+            )
+    except Exception as e:
+        return Output(repositories=[], error=str(e))
+
+
+export = list
+```
+
+### Common Configuration Patterns
+
+**X-API-Key Header** (many APIs):
+```python
+configure_api_key(header_name="X-API-Key")
+```
+
+**Authorization with Different Prefixes**:
+```python
+# OpenAI style
+configure_api_key(
+    header_name="Authorization",
+    header_prefix="Bearer "  # Strips "Bearer sk-..." → "sk-..."
+)
+
+# No prefix
+configure_api_key(
+    header_name="X-Custom-Token",
+    header_prefix=""  # Token used as-is
+)
+```
+
+## OAuth 2.0 Authentication
+
+GolfMCP provides a high-level abstraction for OAuth 2.0 integration, allowing you to configure authentication without manually implementing the MCP SDK's `OAuthAuthorizationServerProvider` interface.
 
 ### Core Concepts
 
