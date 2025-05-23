@@ -70,12 +70,16 @@ For tools, Pydantic `BaseModel` is highly recommended for defining complex input
         ```python
         # tools/hello.py
         """Hello World tool example."""
-        from pydantic import BaseModel
+        from typing import Annotated
+        from pydantic import BaseModel, Field
 
         class Output(BaseModel):
             message: str
 
-        async def hello(name: str = "World", greeting: str = "Hello") -> Output:
+        async def hello(
+            name: Annotated[str, Field(description="The name of the person to greet")] = "World",
+            greeting: Annotated[str, Field(description="The greeting phrase to use")] = "Hello"
+        ) -> Output:
             # 'name' and 'greeting' are direct input parameters.
             # Golf's parser creates an inputSchema in the manifest based on these.
             # FastMCP uses these type hints for runtime validation.
@@ -99,9 +103,9 @@ For tools, Pydantic `BaseModel` is highly recommended for defining complex input
         is_active: bool
 
     async def fetch_user_profile(user_id: int) -> Output:
-        # FastMCP uses the 'UserProfileOutput' return type hint for its
+        # FastMCP uses the 'Output' return type hint for its
         # runtime behavior and schema exposure to clients.
-        return UserProfileOutput(
+        return Output(
             user_id=user_id, 
             username="example_user", 
             email="user@example.com", 
@@ -110,3 +114,67 @@ For tools, Pydantic `BaseModel` is highly recommended for defining complex input
 
     export = fetch_user_profile
     ``` 
+
+### 4. Parameter Annotations (Recommended)
+
+While simple type hints are sufficient, using `Annotated` with Pydantic `Field` provides rich descriptions and validation that significantly improves how AI agents understand and use your tools.
+
+#### Basic Parameter Annotations
+
+```python
+from typing import Annotated
+from pydantic import BaseModel, Field
+
+async def hello(
+    name: Annotated[str, Field(description="The name of the person to greet")] = "World",
+    greeting: Annotated[str, Field(description="The greeting phrase to use")] = "Hello"
+) -> Output:
+    """Say hello to the given name."""
+    return Output(message=f"{greeting}, {name}!")
+```
+
+#### Parameter Validation
+
+Field annotations support various validation constraints:
+
+```python
+from typing import Annotated, Optional
+from pydantic import BaseModel, Field
+
+class ChargeOutput(BaseModel):
+    success: bool
+    charge_id: str
+    message: str
+
+async def charge_payment(
+    # Numeric constraints
+    amount: Annotated[float, Field(
+        description="Amount to charge in USD",
+        gt=0,        # Must be greater than 0
+        le=10000     # Maximum charge limit
+    )],
+    
+    # Pattern validation
+    card_token: Annotated[str, Field(
+        description="Tokenized payment card identifier",
+        pattern=r"^tok_[a-zA-Z0-9]+$"  # Regex validation
+    )],
+    
+    # String length constraints
+    description: Annotated[str, Field(
+        description="Optional payment description",
+        max_length=200,
+        min_length=0
+    )] = "",
+    
+    # Optional parameters with constraints
+    customer_email: Annotated[Optional[str], Field(
+        description="Customer's email address",
+        pattern=r"^[\w\.-]+@[\w\.-]+\.\w+$",
+        default=None
+    )] = None
+) -> ChargeOutput:
+    """Process a payment charge with validation."""
+    # Implementation here
+    pass
+```
