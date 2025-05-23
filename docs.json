@@ -28,6 +28,7 @@
             "group": "Core concepts",
             "pages": [
               "golf-mcp-framework/project-structure",
+              "golf-mcp-framework/configuration",
               "golf-mcp-framework/component-specification",
               "golf-mcp-framework/shared-logic-common-py",
               "golf-mcp-framework/cli-commands"
