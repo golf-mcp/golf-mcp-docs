@@ -50,9 +50,11 @@ my_awesome_server/
 *   **`tools/`**, **`resources/`**, **`prompts/`**: Directories where you'll define your server's capabilities.
 *   **`pre_build.py`**: An optional script for custom logic before building, often used for authentication setup.
 
-### 3. Set Up GitHub OAuth (optional - for the example Tools)
+### 3. Set Up GitHub Authentication (optional - for the example tools)
 
-The boilerplate example includes a GitHub user tool that requires OAuth authentication. To make it work:
+The boilerplate example includes a GitHub user tool that requires authentication. You can choose between two authentication methods:
+
+#### Option A: OAuth Authentication (User-based)
 
 1. **Create a GitHub OAuth App** by following [GitHub's OAuth App creation guide](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app)
    
@@ -67,6 +69,23 @@ The boilerplate example includes a GitHub user tool that requires OAuth authenti
    JWT_SECRET="example-jwt-secret-for-development-only"
    ```
    Replace the values above with your actual GitHub OAuth app credentials.
+
+#### Option B: API Key Authentication (Token-based)
+
+1. **Create a GitHub Personal Access Token** from your [GitHub settings](https://github.com/settings/tokens)
+
+2. **Configure API key authentication** in `pre_build.py`:
+   ```python
+   from golf.auth import configure_api_key
+   
+   # Extract API key from Authorization header
+   configure_api_key(
+       header_name="Authorization",
+       header_prefix="Bearer "
+   )
+   ```
+
+3. **Pass the token** when connecting your MCP client (see Section 7 for client configuration)
 
 ### 4. Create Your First Tool
 
@@ -138,7 +157,7 @@ Congratulations! You've built and run your first GolfMCP server.
 
 To use your GolfMCP server with client like Claude Desktop, Cursor, Windsurf or any other client we recommend [mcp-remote](https://github.com/geelen/mcp-remote/tree/main) to SSE server.
 
-#### Claude Desktop Configuration
+#### Basic Claude Desktop Configuration
 
 Edit your Claude Desktop configuration file:
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
@@ -159,7 +178,7 @@ Add your server configuration:
 }
 ```
 
-#### Cursor Configuration
+#### Basic Cursor Configuration
 
 Edit your Cursor configuration file at `~/.cursor/mcp.json`:
 ```json
