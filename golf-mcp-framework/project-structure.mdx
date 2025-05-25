@@ -1,5 +1,5 @@
 ---
-title: 'Project Structure & Naming'
+title: 'Project structure & naming'
 description: 'Understand GolfMCP project layout and component naming conventions.'
 ---
 
@@ -33,13 +33,13 @@ GolfMCP uses a convention-based project structure.
 *   **`resources/`**: Contains Python files defining data resources the LLM can read.
 *   **`prompts/`**: Contains Python files defining reusable prompt templates.
 
-### Component Discovery
+### Component discovery
 
 *   Each `.py` file within `tools/`, `resources/`, or `prompts/` (and their subdirectories) is treated as a single component.
 *   Files named `__init__.py` are ignored for direct component definition but are essential for Python's packaging if you structure your components as modules.
 *   Files named `common.py` are special and used for shared code (see `common.py` section).
 
-### Component ID Derivation
+### Component ID derivation
 
 The unique ID for each component (used for registration in FastMCP) is derived from its file path relative to the category directory (`tools`, `resources`, `prompts`).
 

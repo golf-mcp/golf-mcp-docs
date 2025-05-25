@@ -1,11 +1,11 @@
 ---
-title: 'Component Specification'
+title: 'Component specification'
 description: 'Learn how to define GolfMCP components (tools, resources, prompts).'
 ---
 
 GolfMCP expects your Python component files to follow certain conventions for metadata and function definitions.
 
-### 1. Metadata Source (Description)
+### 1. Metadata source (description)
 
 The primary source for a component's description is its **module-level docstring**.
 
@@ -21,7 +21,7 @@ It can span multiple lines and will be used by FastMCP.
 *   This docstring is **mandatory**. If missing, the build will fail.
 *   The function docstring of the exported function is generally ignored if a module docstring is present. It might be used as a fallback if the module docstring is missing, but relying on this is not recommended.
 
-### 2. Entry Function (`export`)
+### 2. Entry function (`export`)
 
 GolfMCP needs to know which function within your Python file is the main entry point for the component. This is primarily done by assigning the function to a module-level variable named `export`.
 
@@ -41,7 +41,7 @@ export = add_numbers
 
 If an `export` variable is not found, GolfMCP build will fail.
 
-### 3. Function Signature Requirements
+### 3. Function signature requirements
 
 The signature of your exported function must adhere to certain rules:
 
@@ -115,11 +115,11 @@ For tools, Pydantic `BaseModel` is highly recommended for defining complex input
     export = fetch_user_profile
     ``` 
 
-### 4. Parameter Annotations (Recommended)
+### 4. Parameter annotations (recommended)
 
 While simple type hints are sufficient, using `Annotated` with Pydantic `Field` provides rich descriptions and validation that significantly improves how AI agents understand and use your tools.
 
-#### Basic Parameter Annotations
+#### Basic parameter annotations
 
 ```python
 from typing import Annotated
@@ -133,7 +133,7 @@ async def hello(
     return Output(message=f"{greeting}, {name}!")
 ```
 
-#### Parameter Validation
+#### Parameter validation
 
 Field annotations support various validation constraints:
 

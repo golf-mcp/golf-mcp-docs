@@ -7,7 +7,7 @@ GolfMCP provides two authentication mechanisms to secure your MCP servers:
 1. **OAuth 2.0** - For user-based authentication with external identity providers
 2. **API Key** - For simple pass-through authentication to upstream APIs
 
-## API Key Authentication
+## API key authentication
 
 ### Overview
 
@@ -27,14 +27,14 @@ configure_api_key(
 )
 ```
 
-### How It Works
+### How it works
 
 1. **Middleware**: Golf automatically adds middleware that extracts the API key from incoming request headers
 2. **Context Storage**: The extracted key is stored in a request-scoped context (only exists for the duration of the request)
 3. **Tool Access**: Tools retrieve the API key using `get_api_key()`
 4. **Pass-through**: Tools forward the key to upstream APIs in whatever format they require
 
-### Using in Tools
+### Using in tools
 
 Tools access the API key with a simple import:
 
@@ -53,7 +53,7 @@ async def my_tool():
     )
 ```
 
-### Complete Example: GitHub API Tool
+### Complete example: GitHub API tool
 
 Here's a complete example of a GitHub tool using API key authentication:
 
@@ -130,7 +130,7 @@ async def list(
 export = list
 ```
 
-### Common Configuration Patterns
+### Common configuration patterns
 
 **X-API-Key Header** (many APIs):
 ```python
@@ -152,11 +152,11 @@ configure_api_key(
 )
 ```
 
-## OAuth 2.0 Authentication
+## OAuth 2.0 authentication
 
 GolfMCP provides a high-level abstraction for OAuth 2.0 integration, allowing you to configure authentication without manually implementing the MCP SDK's `OAuthAuthorizationServerProvider` interface.
 
-### Core Concepts
+### Core concepts
 
 *   **`ProviderConfig` (`golf.auth.provider.ProviderConfig`)**:
     A Pydantic model used to define the settings for an external OAuth 2.0 identity provider (IdP). Key fields include:
@@ -205,7 +205,7 @@ GolfMCP provides a high-level abstraction for OAuth 2.0 integration, allowing yo
 *   **Callback Handling (`create_callback_handler` in `golf.auth.oauth`)**:
     This function takes a `GolfOAuthProvider` instance and returns an `async` HTTP request handler. The build process uses this to generate the route for your `callback_path` (e.g., `/auth/callback`) in the `dist/server.py`. This handler processes the redirect from the IdP.
 
-### How Secrets are Handled
+### How secrets are handled
 
 A key design principle is that sensitive secrets (Client ID, Client Secret, JWT Secret) are **not** hardcoded or stored directly in your project files or the built distributable.
 1.  You define *environment variable names* in `ProviderConfig` (e.g., `client_id_env_var="MY_APP_CLIENT_ID"`).
@@ -216,7 +216,7 @@ A key design principle is that sensitive secrets (Client ID, Client Secret, JWT 
 
 This ensures that your `dist/` directory can be safely distributed or committed (if needed, though typically `dist/` is in `.gitignore`) without exposing secrets. Secrets must be present in the environment where the server runs.
 
-### Accessing Provider Tokens (e.g., GitHub Token)
+### Accessing provider tokens (e.g., GitHub token)
 
 If your tools need to make API calls to the external provider on behalf of the user (e.g., call the GitHub API), you can retrieve the IdP's access token that GolfMCP stored during the OAuth flow.
 
