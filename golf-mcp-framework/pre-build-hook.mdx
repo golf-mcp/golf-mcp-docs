@@ -17,7 +17,7 @@ GolfMCP provides an extensibility hook through a `pre_build.py` file located at 
 *   The script can import modules from the GolfMCP framework itself (e.g., `from golf.auth import ProviderConfig, configure_auth, configure_api_key`).
 *   It can interact with a global configuration state that the subsequent build process will use.
 
-**Example 1: OAuth Authentication (GitHub)**
+**Example 1: OAuth authentication (GitHub)**
 
 ```python
 # <project_root>/pre_build.py
@@ -50,7 +50,7 @@ configure_auth(
 print("✅ GitHub OAuth configured in pre_build.py")
 ```
 
-**Example 2: API Key Authentication**
+**Example 2: API key authentication**
 
 ```python
 # <project_root>/pre_build.py
@@ -62,7 +62,8 @@ from golf.auth import configure_api_key
 # This example strips the "Bearer " prefix from tokens
 configure_api_key(
     header_name="Authorization",
-    header_prefix="Bearer "  # Will extract "your-token" from "Bearer your-token"
+    header_prefix="Bearer ",  # Will extract "your-token" from "Bearer your-token"
+    required=True            # When True, all requests must include the API key
 )
 
 print("✅ API key authentication configured in pre_build.py")

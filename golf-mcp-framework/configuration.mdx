@@ -61,6 +61,34 @@ The transport protocol for client-server communication.
 }
 ```
 
+### `opentelemetry_enabled` (boolean)
+Enable OpenTelemetry distributed tracing for your MCP server.
+
+**Default:** `false`
+
+```json
+{
+  "opentelemetry_enabled": true
+}
+```
+
+### `opentelemetry_default_exporter` (string)
+The default exporter to use for OpenTelemetry traces when enabled.
+
+**Options:**
+- `"otlp_http"` - OTLP HTTP exporter (for Jaeger, Grafana Tempo, etc.)
+- `"console"` - Console exporter (for debugging)
+
+**Default:** `"otlp_http"`
+
+```json
+{
+  "opentelemetry_default_exporter": "otlp_http"
+}
+```
+
+**Note**: When using `otlp_http`, you must set the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable. See the environment variables section below.
+
 ## Example configuration
 
 ```json
@@ -70,7 +98,29 @@ The transport protocol for client-server communication.
   "host": "127.0.0.1",
   "port": 3000,
   "transport": "sse",
+  "opentelemetry_enabled": true,
+  "opentelemetry_default_exporter": "otlp_http"
 }
+```
+
+## Environment variables for OpenTelemetry
+
+When OpenTelemetry is enabled, configure these environment variables in your `.env` file:
+
+### Required for OTLP HTTP exporter
+- `OTEL_EXPORTER_OTLP_ENDPOINT` - The endpoint URL for your OpenTelemetry collector (e.g., `http://localhost:4318/v1/traces`)
+
+### Optional
+- `OTEL_SERVICE_NAME` - The service name for traces (defaults to the `name` from golf.json)
+- `OTEL_EXPORTER_OTLP_HEADERS` - Additional headers for the OTLP exporter (e.g., `Authorization=Bearer your-token`)
+- `OTEL_TRACES_EXPORTER` - Override the exporter type (e.g., `console` for debugging)
+
+Example `.env` file:
+```bash
+# OpenTelemetry configuration
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces
+OTEL_SERVICE_NAME=my-mcp-server
+# OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer your-cloud-provider-token
 ```
 
 The `{{project_name}}` placeholder will be replaced with your actual project name when you run `golf init`. 

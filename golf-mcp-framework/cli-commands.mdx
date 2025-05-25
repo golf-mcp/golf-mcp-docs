@@ -14,6 +14,15 @@ golf init <project_name> [options]
 ```
 *   **`project_name`**: (Required) The name of the project and the directory to be created.
 *   **`--output-dir <path>`, `-o <path>`**: Specifies a different directory to create the project in. Defaults to a new directory named `project_name` in the current location.
+*   **`--template <template_name>`**: Use a specific project template. Available templates:
+    *   `default` - Standard GolfMCP project with example components
+    *   `api_key` - Project pre-configured with API key authentication
+
+Example:
+```bash
+# Create a project with API key authentication
+golf init my-api-project --template api_key
+```
 
 ### `golf build <env>`
 
