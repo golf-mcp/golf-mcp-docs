@@ -5,39 +5,69 @@ description: 'Reference for the GolfMCP command-line interface.'
 
 The `golf` command-line interface is your primary tool for managing GolfMCP projects.
 
+## Commands
+
 ### `golf init`
 
 Initializes a new GolfMCP project directory.
 
-```bash
-golf init <project_name> [options]
-```
-*   **`project_name`**: (Required) The name of the project and the directory to be created.
-*   **`--output-dir <path>`, `-o <path>`**: Specifies a different directory to create the project in. Defaults to a new directory named `project_name` in the current location.
-*   **`--template <template_name>`**: Use a specific project template. Available templates:
-    *   `default` - Standard GolfMCP project with example components
-    *   `api_key` - Project pre-configured with API key authentication
-
-Example:
-```bash
-# Create a project with API key authentication
-golf init my-api-project --template api_key
+<CodeGroup>
+```bash Basic
+golf init my_awesome_server
 ```
 
-### `golf build <env>`
-
-Builds your GolfMCP project into a runnable MCP Server
-
-```bash
-golf build dev|prod [options]
+```bash With options
+golf init my-api-project --template api_key --output-dir ./projects
 ```
-*   **`dev`**: Creates a development build. Typically copies the `.env` file from your project root to the output directory (`dist/`) so the server can access environment variables during local development.
-*   **`prod`**: Creates a production build. Environment variables are generally expected to be set in the production environment itself, so `.env` is not copied.
+</CodeGroup>
+
+<ParamField path="project_name" type="string" required>
+  The name of the project and the directory to be created.
+</ParamField>
+
+<ParamField path="--output-dir" type="string">
+  Specifies a different directory to create the project in. Defaults to a new directory named `project_name` in the current location.
+  
+  Alias: `-o`
+</ParamField>
+
+<ParamField path="--template" type="string">
+  Use a specific project template.
+  
+  Available templates:
+  - `default` - Standard GolfMCP project with example components
+  - `api_key` - Project pre-configured with API key authentication
+</ParamField>
+
+### `golf build`
+
+Builds your GolfMCP project into a runnable MCP server.
+
+<CodeGroup>
+```bash Development
+golf build dev
+```
+
+```bash Production
+golf build prod
+```
+</CodeGroup>
+
+<ParamField path="env" type="string" required>
+  The build environment. Must be either `dev` or `prod`.
+  
+  - **`dev`**: Creates a development build. Copies the `.env` file from your project root to the output directory (`dist/`) so the server can access environment variables during local development.
+  - **`prod`**: Creates a production build. Environment variables are expected to be set in the production environment itself, so `.env` is not copied.
+</ParamField>
 
 ### `golf run`
 
 Runs a previously built GolfMCP server.
 
 ```bash
-golf run [options]
-``` 
+golf run
+```
+
+<Note>
+  Make sure to run `golf build` before using `golf run`. The command executes the server from the `dist/` directory.
+</Note> 
