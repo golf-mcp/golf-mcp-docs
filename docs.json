@@ -3,9 +3,9 @@
   "theme": "mint",
   "name": "Authed Documentation",
   "colors": {
-    "primary": "#1E293B",
-    "light": "#334155",
-    "dark": "#0F172A"
+    "primary": "#f97728",
+    "light": "#2a69fd",
+    "dark": "#d85a0a"
   },
   "favicon": "/logo/dark.svg",
   "logo": {
