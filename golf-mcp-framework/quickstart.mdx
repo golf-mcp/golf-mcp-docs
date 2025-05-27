@@ -53,7 +53,7 @@ Let's get you started with your first GolfMCP project from scratch.
     - **`pre_build.py`**: An optional script for custom logic before building, often used for authentication setup.
   </Step>
   
-  <Step title="Set up GitHub authentication (optional)">
+  <Step title="Set up authentication">
     The boilerplate example includes a GitHub user tool that requires authentication. You can choose between two authentication methods:
     
     <Tabs>
@@ -71,6 +71,13 @@ Let's get you started with your first GolfMCP project from scratch.
            JWT_SECRET="example-jwt-secret-for-development-only"
            ```
            Replace the values above with your actual GitHub OAuth app credentials.
+           
+        4. **Access the token in your tools** using:
+           ```python
+           from golf.auth.helpers import get_provider_token
+           
+           token = get_provider_token()
+           ```
       </Tab>
       
       <Tab title="API key authentication">
@@ -88,6 +95,13 @@ Let's get you started with your first GolfMCP project from scratch.
            ```
         
         3. **Pass the token** when connecting your MCP client (see Step 7 for client configuration)
+        
+        4. **Access the API key in your tools** using:
+           ```python
+           from golf.auth import get_api_key
+           
+           api_key = get_api_key()
+           ```
       </Tab>
     </Tabs>
   </Step>
@@ -163,6 +177,9 @@ Let's get you started with your first GolfMCP project from scratch.
     
     <Tabs>
       <Tab title="Claude Desktop">
+        Edit your Claude Desktop configuration file:
+        - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+        - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
         
         Add your server configuration:
         ```json
