@@ -1,5 +1,5 @@
 ---
-title: 'Golf configuration reference'
+title: 'Configuration reference'
 description: 'Complete reference for golf.json configuration options'
 ---
 
@@ -7,87 +7,88 @@ The `golf.json` file is the main configuration file for your Golf project. Place
 
 ## Configuration options
 
-### `name` (string, required)
-The name of your MCP server instance.
+<ResponseField name="name" type="string" required>
+  The name of your MCP server instance.
+  
+  ```json
+  {
+    "name": "MyProject"
+  }
+  ```
+</ResponseField>
 
-```json
-{
-  "name": "MyProject"
-}
-```
+<ResponseField name="description" type="string">
+  A brief description of your Golf project.
+  
+  ```json
+  {
+    "description": "A GolfMCP project"
+  }
+  ```
+</ResponseField>
 
-### `description` (string)
-A brief description of your Golf project.
+<ResponseField name="host" type="string" default="127.0.0.1">
+  The network interface the server will bind to.
+  
+  ```json
+  {
+    "host": "127.0.0.1"
+  }
+  ```
+</ResponseField>
 
-```json
-{
-  "description": "A GolfMCP project"
-}
-```
+<ResponseField name="port" type="integer" default="3000">
+  The port number the server will listen on.
+  
+  ```json
+  {
+    "port": 3000
+  }
+  ```
+</ResponseField>
 
-### `host` (string)
-The network interface the server will bind to.
+<ResponseField name="transport" type="string" default="sse">
+  The transport protocol for client-server communication.
+  
+  **Options:**
+  - `"sse"` - Server-Sent Events
+  - `"streamable-http"` - HTTP with streaming support
+  - `"stdio"` - Standard input/output
+  
+  ```json
+  {
+    "transport": "sse"
+  }
+  ```
+</ResponseField>
 
-**Default:** `"127.0.0.1"` (localhost only)
+<ResponseField name="opentelemetry_enabled" type="boolean" default="false">
+  Enable OpenTelemetry distributed tracing for your MCP server.
+  
+  ```json
+  {
+    "opentelemetry_enabled": true
+  }
+  ```
+</ResponseField>
 
-```json
-{
-  "host": "127.0.0.1"
-}
-```
-
-### `port` (integer)
-The port number the server will listen on.
-
-**Default:** `3000`
-
-```json
-{
-  "port": 3000
-}
-```
-
-### `transport` (string)
-The transport protocol for client-server communication.
-
-**Options:**
-- `"sse"` - Server-Sent Events
-- `"streamable-http"` - HTTP with streaming support
-- `"stdio"` - Standard input/output
-
-```json
-{
-  "transport": "sse"
-}
-```
-
-### `opentelemetry_enabled` (boolean)
-Enable OpenTelemetry distributed tracing for your MCP server.
-
-**Default:** `false`
-
-```json
-{
-  "opentelemetry_enabled": true
-}
-```
-
-### `opentelemetry_default_exporter` (string)
-The default exporter to use for OpenTelemetry traces when enabled.
-
-**Options:**
-- `"otlp_http"` - OTLP HTTP exporter (for Jaeger, Grafana Tempo, etc.)
-- `"console"` - Console exporter (for debugging)
-
-**Default:** `"otlp_http"`
-
-```json
-{
-  "opentelemetry_default_exporter": "otlp_http"
-}
-```
-
-**Note**: When using `otlp_http`, you must set the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable. See the environment variables section below.
+<ResponseField name="opentelemetry_default_exporter" type="string" default="otlp_http">
+  The default exporter to use for OpenTelemetry traces when enabled.
+  
+  **Options:**
+  - `"otlp_http"` - OTLP HTTP exporter (for Jaeger, Grafana Tempo, etc.)
+  - `"console"` - Console exporter (for debugging)
+  
+  ```json
+  {
+    "opentelemetry_default_exporter": "otlp_http"
+  }
+  ```
+  
+  <Note>
+    When using `otlp_http`, you must set the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable. See the environment variables section below.
+  </Note>
+</ResponseField>
 
 ## Example configuration
 
@@ -108,14 +109,33 @@ The default exporter to use for OpenTelemetry traces when enabled.
 When OpenTelemetry is enabled, configure these environment variables in your `.env` file:
 
 ### Required for OTLP HTTP exporter
-- `OTEL_EXPORTER_OTLP_ENDPOINT` - The endpoint URL for your OpenTelemetry collector (e.g., `http://localhost:4318/v1/traces`)
+
+<ResponseField name="OTEL_EXPORTER_OTLP_ENDPOINT" type="string" required>
+  The endpoint URL for your OpenTelemetry collector.
+  
+  Example: `http://localhost:4318/v1/traces`
+</ResponseField>
 
 ### Optional
-- `OTEL_SERVICE_NAME` - The service name for traces (defaults to the `name` from golf.json)
-- `OTEL_EXPORTER_OTLP_HEADERS` - Additional headers for the OTLP exporter (e.g., `Authorization=Bearer your-token`)
-- `OTEL_TRACES_EXPORTER` - Override the exporter type (e.g., `console` for debugging)
 
-Example `.env` file:
+<ResponseField name="OTEL_SERVICE_NAME" type="string">
+  The service name for traces. Defaults to the `name` from golf.json.
+</ResponseField>
+
+<ResponseField name="OTEL_EXPORTER_OTLP_HEADERS" type="string">
+  Additional headers for the OTLP exporter.
+  
+  Example: `Authorization=Bearer your-token`
+</ResponseField>
+
+<ResponseField name="OTEL_TRACES_EXPORTER" type="string">
+  Override the exporter type.
+  
+  Example: `console` for debugging
+</ResponseField>
+
+### Example `.env` file
+
 ```bash
 # OpenTelemetry configuration
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces
@@ -123,4 +143,6 @@ OTEL_SERVICE_NAME=my-mcp-server
 # OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer your-cloud-provider-token
 ```
 
-The `{{project_name}}` placeholder will be replaced with your actual project name when you run `golf init`. 
+<Note>
+  The `{{project_name}}` placeholder will be replaced with your actual project name when you run `golf init`.
+</Note> 
