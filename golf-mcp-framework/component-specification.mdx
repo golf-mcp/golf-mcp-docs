@@ -176,3 +176,105 @@ async def charge_payment(
     # Implementation here
     pass
 ```
+
+### 5. Tool annotations (MCP behavioral hints)
+
+Tool annotations provide behavioral hints about your tools to MCP clients, following the official MCP specification. These hints help clients understand how to interact with your tools safely and efficiently.
+
+#### Overview
+
+Add an `annotations` dictionary at the module level to specify behavioral hints:
+
+```python
+"""Delete file tool."""
+
+from typing import Annotated
+from pydantic import BaseModel, Field
+
+# Tool annotations - MCP behavioral hints
+annotations = {
+    "readOnlyHint": False,      # Tool modifies state
+    "destructiveHint": True,     # Tool may delete/mutate data irreversibly  
+    "idempotentHint": False,     # Repeated calls have side effects
+    "openWorldHint": False       # Tool operates on local state only
+}
+
+class Output(BaseModel):
+    success: bool
+    message: str
+
+async def delete_file(
+    path: Annotated[str, Field(description="Path to file to delete")]
+) -> Output:
+    """Delete a file from the filesystem."""
+    return Output(success=True, message="File deleted")
+
+export = delete_file
+```
+
+#### Supported annotation types
+
+<ResponseField name="readOnlyHint" type="boolean">
+  `true` → tool cannot change state (pure "GET-style" call)
+  
+  **Note**: When `true`, other hints are ignored by MCP clients.
+</ResponseField>
+
+<ResponseField name="destructiveHint" type="boolean">
+  `true` → tool may delete or irreversibly mutate data
+  
+  Only meaningful when `readOnlyHint` is `false`.
+</ResponseField>
+
+<ResponseField name="idempotentHint" type="boolean">
+  `true` → repeated calls with identical arguments are safe and side-effect-free
+  
+  Helps MCP clients add caching and deduplication.
+</ResponseField>
+
+<ResponseField name="openWorldHint" type="boolean">
+  `true` → behavior depends on external mutable state (e.g., live web, clock)
+  
+  Signals lower reproducibility to MCP clients.
+</ResponseField>
+
+#### Common patterns
+
+**Read-only tool:**
+```python
+# Tool that only reads data
+annotations = {
+    "readOnlyHint": True  # Other hints ignored when this is true
+}
+```
+
+**Web search tool:**
+```python
+# Tool that searches the internet
+annotations = {
+    "readOnlyHint": True,        # Doesn't modify local state
+    "openWorldHint": True        # Depends on external web services
+}
+```
+
+**Idempotent tool:**
+```python
+# Tool safe to retry
+annotations = {
+    "readOnlyHint": False,
+    "destructiveHint": False,
+    "idempotentHint": True,      # Safe to call multiple times
+    "openWorldHint": False
+}
+```
+
+**File operations tool:**
+```python
+# Tool that modifies files
+annotations = {
+    "readOnlyHint": False,
+    "destructiveHint": True,     # May delete files
+    "idempotentHint": False,     # Multiple calls may have different effects
+    "openWorldHint": False       # Works on local filesystem
+}
+```
