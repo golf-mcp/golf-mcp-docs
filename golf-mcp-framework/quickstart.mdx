@@ -6,15 +6,15 @@ description: 'Get started with your first GolfMCP project from scratch.'
 Let's get you started with your first GolfMCP project from scratch.
 
 <Steps>
-  <Step title="Install GolfMCP">
-    Install the Golf MCP framework using pip:
+<Step title="Install GolfMCP">
+Install the Golf MCP framework using pip:
 
 ```bash
 pip install golf-mcp
 ```
-  </Step>
+</Step>
 
-  <Step title="Initialize your project">
+<Step title="Initialize your project">
 Create a new GolfMCP project using the `init` command:
 
 ```bash
@@ -47,19 +47,19 @@ my_awesome_server/
         └── refund.py
 ```
 
-    - **`golf.json`**: Configures your server's name, port, transport, etc.
-    - **`.env`**: Stores environment-specific variables (automatically created).
-    - **`tools/`**, **`resources/`**, **`prompts/`**: Directories where you'll define your server's capabilities.
-    - **`pre_build.py`**: An optional script for custom logic before building, often used for authentication setup.
-  </Step>
-  
-  <Step title="Set up authentication">
+- **`golf.json`**: Configures your server's name, port, transport, etc.
+- **`.env`**: Stores environment-specific variables (automatically created).
+- **`tools/`**, **`resources/`**, **`prompts/`**: Directories where you'll define your server's capabilities.
+- **`pre_build.py`**: An optional script for custom logic before building, often used for authentication setup.
+</Step>
+
+<Step title="Set up authentication">
 The boilerplate example includes a GitHub user tool that requires authentication. You can choose between two authentication methods:
 
-    <Tabs>
-      <Tab title="OAuth authentication">
+<Tabs>
+<Tab title="OAuth authentication">
 1. **Create a GitHub OAuth App** by following [GitHub's OAuth App creation guide](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app)
-   
+
 2. **Configure the OAuth App URLs (for local testing):**
    - **Homepage URL:** `http://127.0.0.1:3000`
    - **Authorization callback URL:** `http://127.0.0.1:3000/auth/callback`
@@ -72,15 +72,15 @@ The boilerplate example includes a GitHub user tool that requires authentication
    ```
    Replace the values above with your actual GitHub OAuth app credentials.
 
-        4. **Access the token in your tools** using:
-           ```python
-           from golf.auth.helpers import get_provider_token
-           
-           token = get_provider_token()
-           ```
-      </Tab>
-      
-      <Tab title="API key authentication">
+4. **Access the token in your tools** using:
+   ```python
+   from golf.auth.helpers import get_provider_token
+   
+   token = get_provider_token()
+   ```
+</Tab>
+
+<Tab title="API key authentication">
 1. **Create a GitHub Personal Access Token** from your [GitHub settings](https://github.com/settings/tokens)
 
 2. **Configure API key authentication** in `pre_build.py`:
@@ -94,19 +94,19 @@ The boilerplate example includes a GitHub user tool that requires authentication
    )
    ```
 
-        3. **Pass the token** when connecting your MCP client (see Step 7 for client configuration)
+3. **Pass the token** when connecting your MCP client (see Step 7 for client configuration)
 
-        4. **Access the API key in your tools** using:
-           ```python
-           from golf.auth import get_api_key
-           
-           api_key = get_api_key()
-           ```
-      </Tab>
-    </Tabs>
-  </Step>
-  
-  <Step title="Create your first tool">
+4. **Access the API key in your tools** using:
+   ```python
+   from golf.auth import get_api_key
+   
+   api_key = get_api_key()
+   ```
+</Tab>
+</Tabs>
+</Step>
+
+<Step title="Create your first tool">
 Let's modify the example "hello" tool. Open `tools/hello.py`:
 
 ```python
@@ -146,9 +146,9 @@ Key points about this tool:
 - **Parameter Annotations**: We use `Annotated` with `Field` to provide descriptions for each parameter. This helps AI agents understand how to use your tool effectively.
 - **Output Model**: The `Output` class defines the structure of the response using Pydantic.
 - **Export**: The `export = hello` line tells Golf which function to expose as the tool.
-  </Step>
+</Step>
 
-  <Step title="Build for development">
+<Step title="Build for development">
 Compile your project for development:
 
 ```bash
@@ -156,27 +156,27 @@ golf build dev
 ```
 
 This command:
-    - Parses your project files.
-    - Transforms them into a FastMCP server structure.
-    - Creates a `dist/` directory containing the runnable server (`server.py`) and any necessary supporting files (like auth components).
-    - For `dev` builds, it copies your `.env` file to the `dist/` directory, making environment variables available to the server.
-  </Step>
-  
-  <Step title="Run your server">
+- Parses your project files.
+- Transforms them into a FastMCP server structure.
+- Creates a `dist/` directory containing the runnable server (`server.py`) and any necessary supporting files (like auth components).
+- For `dev` builds, it copies your `.env` file to the `dist/` directory, making environment variables available to the server.
+</Step>
+
+<Step title="Run your server">
 Execute the built server:
 
 ```bash
 golf run
 ```
 
-Congratulations! You've built and run your first GolfMCP server. 
-  </Step>
+Congratulations! You've built and run your first GolfMCP server.
+</Step>
 
-  <Step title="Connect to Claude or Cursor">
+<Step title="Connect to Claude or Cursor">
 To use your GolfMCP server with client like Claude Desktop, Cursor, Windsurf or any other client we recommend [mcp-remote](https://github.com/geelen/mcp-remote/tree/main) to SSE server.
 
-    <Tabs>
-      <Tab title="Claude Desktop">
+<Tabs>
+<Tab title="Claude Desktop">
 Edit your Claude Desktop configuration file:
 - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
@@ -196,7 +196,7 @@ Add your server configuration:
 }
 ```
 
-        **With API key authentication:**
+**With API key authentication:**
 ```json
 {
   "mcpServers": {
@@ -215,9 +215,9 @@ Add your server configuration:
   }
 }
 ```
-      </Tab>
+</Tab>
 
-      <Tab title="Cursor">
+<Tab title="Cursor">
 Edit your Cursor configuration file at `~/.cursor/mcp.json`:
 ```json
 {
@@ -233,7 +233,7 @@ Edit your Cursor configuration file at `~/.cursor/mcp.json`:
 }
 ```
 
-        **With API key authentication:**
+**With API key authentication:**
 ```json
 {
   "mcpServers": {
@@ -252,10 +252,10 @@ Edit your Cursor configuration file at `~/.cursor/mcp.json`:
   }
 }
 ```
-      </Tab>
-    </Tabs>
+</Tab>
+</Tabs>
 
-    <Accordion title="Troubleshooting authentication errors">
+<Accordion title="Troubleshooting authentication errors">
 If you encounter authentication errors like:
 ```
 Authentication Error
@@ -267,7 +267,7 @@ Clear any locally stored state and tokens:
 rm -rf ~/.mcp-auth
 ```
 
-Then restart your MCP client and try connecting again. 
-    </Accordion>
-  </Step>
+Then restart your MCP client and try connecting again.
+</Accordion>
+</Step>
 </Steps> 
