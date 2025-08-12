@@ -10,7 +10,7 @@ The primary source for a component's description is its **module-level docstring
 ```python
 # tools/my_tool.py
 """This is the description for 'my_tool'.
-It can span multiple lines and will be used by FastMCP.
+It can span multiple lines and will be used to generate tool description.
 """
 
 # ... rest of the tool code
@@ -59,7 +59,7 @@ The signature of your exported function must adhere to certain rules:
 
 **Pydantic for Input/Output Schemas (Tools):**
 
-For tools, Pydantic `BaseModel` is highly recommended for defining complex input argument structures and output shapes, enabling clear schemas and validation for FastMCP.
+For tools, Pydantic `BaseModel` is highly recommended for defining complex input argument structures and output shapes, enabling clear schemas and validation.
 
 *   **Input Parameters & Schema:**
     Tool inputs are **always** defined by the parameters of your exported tool function. These parameters **must** have type hints and descriptions.
@@ -80,7 +80,6 @@ For tools, Pydantic `BaseModel` is highly recommended for defining complex input
         ) -> Output:
             # 'name' and 'greeting' are direct input parameters.
             # Golf's parser creates an inputSchema in the manifest based on these.
-            # FastMCP uses these type hints for runtime validation.
             return Output(message=f"{greeting}, {name}!")
         export = hello
         ```
@@ -101,7 +100,7 @@ For tools, Pydantic `BaseModel` is highly recommended for defining complex input
         is_active: bool
 
     async def fetch_user_profile(user_id: int) -> Output:
-        # FastMCP uses the 'Output' return type hint for its
+        # We use the 'Output' return type hint for its
         # runtime behavior and schema exposure to clients.
         return Output(
             user_id=user_id, 
