@@ -1,0 +1,478 @@
+---
+title: 'Telemetry & Monitoring'
+description: 'Enhanced OpenTelemetry integration and monitoring capabilities in Golf v0.2.0.'
+---
+
+Golf v0.2.0 introduces comprehensive telemetry and monitoring capabilities through automatic OpenTelemetry integration, enhanced instrumentation, and seamless Golf Platform connectivity.
+
+## Overview
+
+Golf's telemetry system provides:
+
+- **Automatic OpenTelemetry Integration** - Enabled when `GOLF_API_KEY` is present
+- **Detailed Tracing** - For tools, resources, prompts, and Golf utilities
+- **Prometheus Metrics** - For performance monitoring and analytics
+- **Input/Output Capture** - Safe serialization of request and response data
+- **Configurable Detail Levels** - Control what gets traced and monitored
+
+## Automatic Golf Platform Integration
+
+### Enabling Telemetry
+
+Telemetry is automatically enabled when you set the `GOLF_API_KEY` environment variable:
+
+```bash
+# Enable telemetry with Golf Platform
+export GOLF_API_KEY="your-platform-key"
+golf run  # ✅ Telemetry automatically active
+```
+
+### What Gets Monitored
+
+With Golf Platform integration, the following are automatically instrumented:
+
+**Tool Execution:**
+- Tool invocation timing
+- Input parameters and output responses
+- Success/failure rates
+- Error details and stack traces
+
+**Golf Utilities:**
+- Elicitation interactions and response times
+- Sampling operations and token usage
+- Context access patterns
+- Model performance metrics
+
+**Resource Access:**
+- Resource retrieval timing
+- Data size and transfer metrics
+- Cache hit/miss ratios
+- Access patterns
+
+**Authentication:**
+- Authentication success/failure rates
+- Token validation timing
+- Authorization scope usage
+- Security event tracking
+
+## OpenTelemetry Configuration
+
+### Basic Configuration
+
+Configure OpenTelemetry in your `golf.json`:
+
+```json
+{
+  "name": "my-project",
+  "opentelemetry_enabled": true,
+  "opentelemetry_default_exporter": "otlp_http"
+}
+```
+
+### Advanced Configuration
+
+For custom telemetry setups, use environment variables:
+
+```bash
+# OTLP HTTP Exporter (recommended)
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces
+OTEL_SERVICE_NAME=my-mcp-server
+OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer your-token
+
+# Console Exporter (for debugging)
+OTEL_TRACES_EXPORTER=console
+
+# Custom sampling
+OTEL_TRACES_SAMPLER=traceidratio
+OTEL_TRACES_SAMPLER_ARG=0.1  # Sample 10% of traces
+```
+
+## Instrumentation Details
+
+### Tool Instrumentation
+
+Every tool execution is automatically traced:
+
+```python
+# This tool is automatically instrumented
+async def my_tool(param: str):
+    # Span automatically created with:
+    # - Tool name and ID
+    # - Input parameters (safely serialized)
+    # - Execution timing
+    # - Output response
+    # - Any errors or exceptions
+    
+    result = process_data(param)
+    return {"result": result}
+```
+
+**Captured Metrics:**
+- `golf.tool.invocations` - Total tool calls
+- `golf.tool.duration` - Execution time distribution
+- `golf.tool.errors` - Error counts by tool and type
+- `golf.tool.success_rate` - Success percentage by tool
+
+### Golf Utilities Instrumentation
+
+Golf utilities provide rich telemetry:
+
+```python
+from golf.utils import elicit, sample
+
+async def instrumented_tool():
+    # Elicitation is traced with:
+    # - Prompt text (configurable)
+    # - Response time
+    # - User interaction patterns
+    user_input = await elicit("What would you like to do?")
+    
+    # Sampling is traced with:
+    # - Model used
+    # - Token usage (input/output)
+    # - Generation time
+    # - Model performance metrics
+    analysis = await sample(f"Analyze: {user_input}", model="gpt-4")
+    
+    return {"analysis": analysis}
+```
+
+**Utility Metrics:**
+- `golf.elicit.interactions` - User interaction counts
+- `golf.elicit.response_time` - Time to user response
+- `golf.sample.requests` - LLM sampling requests
+- `golf.sample.tokens` - Token usage by model
+- `golf.sample.duration` - Generation time distribution
+
+### Authentication Instrumentation
+
+Authentication flows are comprehensively monitored:
+
+```python
+# JWT validation tracing
+# - Token validation time
+# - JWKS endpoint performance
+# - Scope verification results
+# - Security events
+
+# API key processing tracing  
+# - Header extraction timing
+# - Key validation results
+# - Downstream API usage
+
+# Development auth tracing
+# - Token lookup performance
+# - Scope matching results
+# - Configuration validation
+```
+
+**Authentication Metrics:**
+- `golf.auth.attempts` - Authentication attempts by method
+- `golf.auth.success_rate` - Success rates by auth type
+- `golf.auth.token_validation_time` - JWT/token validation performance
+- `golf.auth.failures` - Failure counts by reason
+
+## Custom Instrumentation
+
+### Adding Custom Traces
+
+You can add custom tracing to your tools:
+
+```python
+from opentelemetry import trace
+from golf.utils import get_context
+
+# Get the Golf tracer
+tracer = trace.get_tracer("my-tool")
+
+async def custom_instrumented_tool():
+    context = get_context()
+    
+    with tracer.start_as_current_span("custom-operation") as span:
+        # Add custom attributes
+        span.set_attribute("user.id", context.get("user_id"))
+        span.set_attribute("operation.type", "data_processing")
+        
+        # Your custom logic here
+        result = await complex_operation()
+        
+        # Add result metadata
+        span.set_attribute("result.items", len(result))
+        span.set_attribute("operation.success", True)
+        
+        return result
+```
+
+### Custom Metrics
+
+Add custom metrics for business logic:
+
+```python
+from opentelemetry import metrics
+
+# Get meter
+meter = metrics.get_meter("my-tool")
+
+# Create custom metrics
+operation_counter = meter.create_counter(
+    "my_tool.operations",
+    description="Number of operations performed"
+)
+
+processing_time = meter.create_histogram(
+    "my_tool.processing_time",
+    description="Time spent processing requests"
+)
+
+async def metric_enabled_tool():
+    start_time = time.time()
+    
+    # Your tool logic
+    result = await process_data()
+    
+    # Record metrics
+    operation_counter.add(1, {"operation_type": "data_processing"})
+    processing_time.record(time.time() - start_time)
+    
+    return result
+```
+
+## Monitoring Dashboards
+
+### Golf Platform Dashboard
+
+When using `GOLF_API_KEY`, access your monitoring dashboard at:
+
+```
+https://platform.golf.dev/dashboard/your-project
+```
+
+**Dashboard Features:**
+- Real-time performance metrics
+- Error tracking and alerting
+- User interaction analytics
+- Resource utilization monitoring
+- Cost tracking for LLM operations
+
+### Custom Dashboards
+
+For custom telemetry setups, Golf exports data compatible with:
+
+**Jaeger** - Distributed tracing visualization:
+```bash
+# Run Jaeger locally
+docker run -d --name jaeger \
+  -p 16686:16686 \
+  -p 14250:14250 \
+  jaegertracing/all-in-one:latest
+
+# Configure Golf
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:14250
+```
+
+**Grafana + Tempo** - Advanced observability:
+```yaml
+# docker-compose.yml
+version: '3'
+services:
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+```
+
+**Prometheus** - Metrics collection:
+```bash
+# prometheus.yml
+scrape_configs:
+  - job_name: 'golf-server'
+    static_configs:
+      - targets: ['localhost:3000']
+    metrics_path: '/metrics'
+```
+
+## Data Privacy and Security
+
+### Sensitive Data Handling
+
+Golf automatically sanitizes sensitive data in traces:
+
+```python
+# Automatically sanitized fields:
+# - Authorization headers
+# - API keys and tokens
+# - Password fields
+# - Credit card numbers
+# - Social security numbers
+
+async def sensitive_tool(api_key: str, user_data: dict):
+    # api_key will be masked in traces as "***"
+    # user_data fields with sensitive names are automatically redacted
+    return process_with_api(api_key, user_data)
+```
+
+### Configuring Data Capture
+
+Control what data is captured in telemetry:
+
+```json
+{
+  "name": "my-project",
+  "telemetry": {
+    "capture_input_params": true,
+    "capture_output_data": true,
+    "sanitize_sensitive_fields": true,
+    "max_param_length": 1000,
+    "excluded_tools": ["admin_tool", "debug_tool"]
+  }
+}
+```
+
+### Environment-Based Configuration
+
+```bash
+# Production: minimal data capture
+GOLF_TELEMETRY_LEVEL=minimal
+GOLF_CAPTURE_PARAMS=false
+GOLF_CAPTURE_OUTPUT=false
+
+# Development: full instrumentation
+GOLF_TELEMETRY_LEVEL=full
+GOLF_CAPTURE_PARAMS=true
+GOLF_CAPTURE_OUTPUT=true
+```
+
+## Performance Optimization
+
+### Sampling Configuration
+
+Configure trace sampling to manage overhead:
+
+```bash
+# Sample 10% of traces in production
+OTEL_TRACES_SAMPLER=traceidratio
+OTEL_TRACES_SAMPLER_ARG=0.1
+
+# Always sample errors
+GOLF_ALWAYS_SAMPLE_ERRORS=true
+```
+
+### Batching and Export
+
+Optimize telemetry export performance:
+
+```bash
+# Batch configuration
+OTEL_BSP_MAX_QUEUE_SIZE=2048
+OTEL_BSP_MAX_EXPORT_BATCH_SIZE=512
+OTEL_BSP_EXPORT_TIMEOUT=30000
+
+# Export intervals
+OTEL_BSP_SCHEDULE_DELAY=5000
+```
+
+### Memory Management
+
+Control memory usage of telemetry:
+
+```json
+{
+  "telemetry": {
+    "max_spans_in_memory": 10000,
+    "span_retention_time": 300,
+    "auto_cleanup_enabled": true
+  }
+}
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Telemetry Not Working:**
+```bash
+# Check if GOLF_API_KEY is set
+echo $GOLF_API_KEY
+
+# Verify configuration
+golf build dev
+grep -r "opentelemetry" dist/
+
+# Test connectivity
+curl -H "Authorization: Bearer $GOLF_API_KEY" \
+     https://api.golf.dev/health
+```
+
+**High Overhead:**
+```bash
+# Reduce sampling rate
+export OTEL_TRACES_SAMPLER_ARG=0.01  # 1% sampling
+
+# Disable parameter capture
+export GOLF_CAPTURE_PARAMS=false
+
+# Use async export
+export OTEL_BSP_SCHEDULE_DELAY=10000
+```
+
+**Missing Traces:**
+```bash
+# Enable console export for debugging
+export OTEL_TRACES_EXPORTER=console
+
+# Check logs
+golf run 2>&1 | grep -i telemetry
+```
+
+### Debug Mode
+
+Enable detailed telemetry debugging:
+
+```bash
+# Enable telemetry debug logging
+export GOLF_TELEMETRY_DEBUG=true
+export OTEL_LOG_LEVEL=debug
+
+golf run
+```
+
+## Integration Examples
+
+### Complete Monitoring Setup
+
+```python
+# auth.py
+from golf.auth import configure_api_key
+
+configure_api_key(
+    header_name="Authorization",
+    header_prefix="Bearer "
+)
+```
+
+```json
+// golf.json
+{
+  "name": "monitored-server",
+  "opentelemetry_enabled": true,
+  "opentelemetry_default_exporter": "otlp_http",
+  "telemetry": {
+    "capture_input_params": true,
+    "capture_output_data": true,
+    "max_param_length": 500
+  }
+}
+```
+
+```bash
+# .env
+GOLF_API_KEY=your-platform-key
+OTEL_SERVICE_NAME=monitored-server
+OTEL_EXPORTER_OTLP_ENDPOINT=https://api.golf.dev/v1/traces
+```
+
+Golf's telemetry system provides comprehensive observability into your MCP server's performance, user interactions, and system behavior, enabling data-driven optimization and proactive issue resolution.
