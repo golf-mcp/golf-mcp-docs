@@ -34,13 +34,7 @@ golf init my-api-project --output-dir ./projects
 
 ### `golf build`
 
-Builds your GolfMCP project into a runnable MCP server. The build process now includes enhanced authentication handling and validation.
-
-**New in v0.2.0:**
-- Uses dedicated `auth.py` file for authentication configuration
-- Validates authentication configuration and setup
-- Provides clearer error messages for authentication setup issues
-- Better environment variable validation at build time
+Builds your GolfMCP project into a runnable MCP server. The build process includes enhanced authentication handling and validation.
 
 <CodeGroup>
 ```bash Development
@@ -52,12 +46,30 @@ golf build prod
 ```
 </CodeGroup>
 
-<ParamField path="env" type="string" required>
-  The build environment. Must be either `dev` or `prod`.
-  
-  - **`dev`**: Creates a development build. Copies the `.env` file from your project root to the output directory (`dist/`) so the server can access environment variables during local development.
-  - **`prod`**: Creates a production build. Environment variables are expected to be set in the production environment itself, so `.env` is not copied.
-</ParamField>
+The build environment parameter is required and must be either `dev` or `prod`:
+
+<table>
+  <thead>
+    <tr>
+      <th>Development (`dev`)</th>
+      <th>Production (`prod`)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        • Copies `.env` file to `dist/` directory<br/>
+        • Environment variables loaded from local file<br/>
+        • Optimized for local development and testing
+      </td>
+      <td>
+        • No `.env` file copied<br/>
+        • Environment variables expected at runtime<br/>
+        • Optimized for production deployment
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ### `golf run`
 
@@ -67,71 +79,7 @@ Runs a previously built GolfMCP server with enhanced runtime features.
 golf run
 ```
 
-**New in v0.2.0:**
-- More secure environment variable loading
-- Better authentication error reporting  
-- Standards-compliant auth endpoints
-- Automatic Golf Platform telemetry when `GOLF_API_KEY` is present
 
 <Note>
-  Make sure to run `golf build` before using `golf run`. The command executes the server from the `dist/` directory.
+  Make sure to run `golf build` before using `golf run`.
 </Note>
-
-## Enhanced Features in v0.2.0
-
-### Project Initialization
-
-The `golf init` command now provides:
-
-- **Golf Branding**: ASCII logo and enhanced visual output during initialization
-- **Simplified Structure**: No more complex template selection
-- **Modern Authentication**: Automatic setup for current authentication methods
-- **Clean Output**: Improved messaging and user experience
-
-### Build Process
-
-The `golf build` command includes:
-
-- **Authentication Configuration**: Uses dedicated `auth.py` file for authentication setup
-- **Configuration Validation**: Detects and reports authentication setup issues
-- **Enhanced Error Messages**: Clear guidance for fixing configuration issues
-- **Environment Validation**: Verifies required environment variables at build time
-
-### Runtime Features
-
-The `golf run` command provides:
-
-- **Secure Loading**: Improved environment variable handling
-- **Better Diagnostics**: Enhanced error reporting and logging
-- **Platform Integration**: Automatic telemetry with Golf Platform
-- **Standards Compliance**: FastMCP authentication providers
-
-## Command Examples
-
-### Creating a New Project
-
-```bash
-# Create project with Golf branding
-golf init my-awesome-server
-
-# Create in specific directory
-golf init payment-tools --output-dir ./projects
-```
-
-### Building for Different Environments
-
-```bash
-# Development build (includes .env file)
-golf build dev
-
-# Production build (environment variables expected at runtime)
-golf build prod
-```
-
-### Running with Golf Platform
-
-```bash
-# Set Golf Platform API key for enhanced telemetry
-export GOLF_API_KEY=your-platform-key
-golf run
-``` 
