@@ -47,7 +47,6 @@ JWT_AUDIENCE=your-api-audience
 1. **Token Validation**: Golf validates JWTs against the JWKS endpoint
 2. **Standards Compliance**: Full RFC 7519 JWT validation
 3. **Scope Verification**: Ensures tokens have required scopes
-4. **Secure Processing**: Battle-tested FastMCP authentication providers
 
 ## Development Authentication
 
@@ -280,7 +279,7 @@ response = await elicit("What's your favorite color?")
 # Sampling utilities for LLM interactions  
 result = await sample("Explain quantum physics", model="gpt-4")
 
-# Context utilities for accessing FastMCP context
+# Context utilities for accessing context
 context = get_context()
 ```
 
