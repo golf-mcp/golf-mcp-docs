@@ -26,10 +26,10 @@ GolfMCP uses a convention-based project structure.
 ```
 
 *   **`golf.json`**: The main configuration file (see [Configuration](/golf-mcp-framework/configuration)).
-*   **`auth.py`**: Dedicated authentication configuration file (preferred in v0.2.0).
-*   **`tools/`**: Contains Python files defining your server's tools (callable functions).
-*   **`resources/`**: Contains Python files defining data resources the LLM can read.
-*   **`prompts/`**: Contains Python files defining reusable prompt templates.
+*   **`auth.py`**: Dedicated authentication configuration file (see [Authentication](/golf-mcp-framework/authentication)).
+*   **`tools/`**: Contains Python files defining your server's tools (see [Component Specification](/golf-mcp-framework/component-specification)).
+*   **`resources/`**: Contains Python files defining data resources the LLM can read (see [Component Specification](/golf-mcp-framework/component-specification)).
+*   **`prompts/`**: Contains Python files defining reusable prompt templates (see [Component Specification](/golf-mcp-framework/component-specification)).
 
 <Note>
   **Deprecated:** Authentication configuration in `pre_build.py` is deprecated. Use the dedicated `auth.py` file instead for cleaner organization and better maintainability.
@@ -60,13 +60,7 @@ ID collisions will result in a build-time error.
 
 Golf v0.2.0 introduces a dedicated `auth.py` file for authentication configuration, providing better organization and cleaner separation from other build logic.
 
-**Benefits of using `auth.py`:**
-- **Clean Separation**: Authentication logic separate from other build tasks
-- **Better Organization**: Easier to maintain authentication-heavy projects
-- **Improved Clarity**: Clear intent and easier to understand
-- **Enhanced Validation**: Better error messages for authentication setup issues
-
-**Example `auth.py` configurations:**
+**Example `auth.py` configurations** (for full details, see [Authentication](/golf-mcp-framework/authentication)):
 
 ```python
 # auth.py - API Key Authentication
@@ -104,13 +98,3 @@ configure_dev_auth(
     required_scopes=["read"]
 )
 ```
-
-### Build Process
-
-During `golf build`, the system:
-
-1. **Uses `auth.py`** - Loads authentication configuration from the dedicated file
-2. **Validates configuration** - Ensures authentication setup is correct
-3. **Generates server code** - Creates appropriate authentication middleware
-
- 
