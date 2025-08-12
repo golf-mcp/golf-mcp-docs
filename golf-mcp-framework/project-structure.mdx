@@ -31,6 +31,10 @@ GolfMCP uses a convention-based project structure.
 *   **`resources/`**: Contains Python files defining data resources the LLM can read.
 *   **`prompts/`**: Contains Python files defining reusable prompt templates.
 
+<Note>
+  **Deprecated:** Authentication configuration in `pre_build.py` is deprecated. Use the dedicated `auth.py` file instead for cleaner organization and better maintainability.
+</Note>
+
 ### Component Discovery
 
 *   Each `.py` file within `tools/`, `resources/`, or `prompts/` (and their subdirectories) is treated as a single component.
@@ -40,7 +44,7 @@ GolfMCP uses a convention-based project structure.
 
 ### Component ID Derivation
 
-The unique ID for each component (used for registration in FastMCP) is derived from its file path relative to the category directory (`tools`, `resources`, `prompts`).
+The unique ID for each component is derived from its file path relative to the category directory (`tools`, `resources`, `prompts`).
 
 **Examples:**
 
@@ -109,8 +113,4 @@ During `golf build`, the system:
 2. **Validates configuration** - Ensures authentication setup is correct
 3. **Generates server code** - Creates appropriate authentication middleware
 
-### Legacy Authentication Configuration
-
-<Note>
-  **Deprecated:** Authentication configuration in `pre_build.py` is deprecated. Use the dedicated `auth.py` file instead for cleaner organization and better maintainability.
-</Note> 
+ 
