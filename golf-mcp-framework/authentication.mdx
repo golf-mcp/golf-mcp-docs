@@ -265,24 +265,6 @@ my-project/
   **Legacy Support:** Authentication configuration in `pre_build.py` is still supported but deprecated. Use `auth.py` for new projects.
 </Note>
 
-## Golf Utilities Integration
-
-Golf v0.2.0 includes built-in utilities that work seamlessly with the authentication system:
-
-```python
-# Available in all tools automatically
-from golf.utils import elicit, sample, get_context
-
-# Elicitation utilities for user interaction
-response = await elicit("What's your favorite color?")
-
-# Sampling utilities for LLM interactions  
-result = await sample("Explain quantum physics", model="gpt-4")
-
-# Context utilities for accessing context
-context = get_context()
-```
-
 These utilities respect the authentication context and provide enhanced telemetry when used with the Golf Platform.
 
 ## Choosing the Right Authentication Method
