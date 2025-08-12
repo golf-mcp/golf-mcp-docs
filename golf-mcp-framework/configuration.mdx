@@ -25,12 +25,12 @@ The `golf.json` file is the main configuration file for your Golf project. Place
   ```
 </ResponseField>
 
-<ResponseField name="host" type="string" default="127.0.0.1">
+<ResponseField name="host" type="string" default="localhost">
   The network interface the server will bind to.
   
   ```json
   {
-    "host": "127.0.0.1"
+    "host": "localhost"
   }
   ```
 </ResponseField>
@@ -94,7 +94,7 @@ The `golf.json` file is the main configuration file for your Golf project. Place
 {
   "name": "{{project_name}}",
   "description": "A GolfMCP project",
-  "host": "127.0.0.1",
+  "host": "localhost",
   "port": 3000,
   "transport": "sse",
   "opentelemetry_enabled": true,
