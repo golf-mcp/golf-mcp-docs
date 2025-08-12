@@ -9,7 +9,7 @@ The `golf` command-line interface is your primary tool for managing GolfMCP proj
 
 ### `golf init`
 
-Initializes a new GolfMCP project directory.
+Initializes a new GolfMCP project directory with Golf branding and modern authentication setup.
 
 <CodeGroup>
 ```bash Basic
@@ -17,7 +17,7 @@ golf init my_awesome_server
 ```
 
 ```bash With options
-golf init my-api-project --template api_key --output-dir ./projects
+golf init my-api-project --output-dir ./projects
 ```
 </CodeGroup>
 
@@ -31,17 +31,16 @@ golf init my-api-project --template api_key --output-dir ./projects
   Alias: `-o`
 </ParamField>
 
-<ParamField path="--template" type="string">
-  Use a specific project template.
-  
-  Available templates:
-  - `default` - Standard GolfMCP project with example components
-  - `api_key` - Project pre-configured with API key authentication
-</ParamField>
 
 ### `golf build`
 
-Builds your GolfMCP project into a runnable MCP server.
+Builds your GolfMCP project into a runnable MCP server. The build process now includes enhanced authentication handling and validation.
+
+**New in v0.2.0:**
+- Uses dedicated `auth.py` file for authentication configuration
+- Validates authentication configuration and setup
+- Provides clearer error messages for authentication setup issues
+- Better environment variable validation at build time
 
 <CodeGroup>
 ```bash Development
@@ -62,12 +61,77 @@ golf build prod
 
 ### `golf run`
 
-Runs a previously built GolfMCP server.
+Runs a previously built GolfMCP server with enhanced runtime features.
 
 ```bash
 golf run
 ```
 
+**New in v0.2.0:**
+- More secure environment variable loading
+- Better authentication error reporting  
+- Standards-compliant auth endpoints
+- Automatic Golf Platform telemetry when `GOLF_API_KEY` is present
+
 <Note>
   Make sure to run `golf build` before using `golf run`. The command executes the server from the `dist/` directory.
-</Note> 
+</Note>
+
+## Enhanced Features in v0.2.0
+
+### Project Initialization
+
+The `golf init` command now provides:
+
+- **Golf Branding**: ASCII logo and enhanced visual output during initialization
+- **Simplified Structure**: No more complex template selection
+- **Modern Authentication**: Automatic setup for current authentication methods
+- **Clean Output**: Improved messaging and user experience
+
+### Build Process
+
+The `golf build` command includes:
+
+- **Authentication Configuration**: Uses dedicated `auth.py` file for authentication setup
+- **Configuration Validation**: Detects and reports authentication setup issues
+- **Enhanced Error Messages**: Clear guidance for fixing configuration issues
+- **Environment Validation**: Verifies required environment variables at build time
+
+### Runtime Features
+
+The `golf run` command provides:
+
+- **Secure Loading**: Improved environment variable handling
+- **Better Diagnostics**: Enhanced error reporting and logging
+- **Platform Integration**: Automatic telemetry with Golf Platform
+- **Standards Compliance**: FastMCP authentication providers
+
+## Command Examples
+
+### Creating a New Project
+
+```bash
+# Create project with Golf branding
+golf init my-awesome-server
+
+# Create in specific directory
+golf init payment-tools --output-dir ./projects
+```
+
+### Building for Different Environments
+
+```bash
+# Development build (includes .env file)
+golf build dev
+
+# Production build (environment variables expected at runtime)
+golf build prod
+```
+
+### Running with Golf Platform
+
+```bash
+# Set Golf Platform API key for enhanced telemetry
+export GOLF_API_KEY=your-platform-key
+golf run
+``` 
