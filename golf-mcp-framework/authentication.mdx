@@ -1,13 +1,99 @@
 ---
 title: 'Authentication'
-description: 'Implement OAuth 2.0 and API key authentication in your GolfMCP servers.'
+description: 'Implement JWT, development, and API key authentication in your GolfMCP servers.'
 ---
 
-GolfMCP provides two authentication mechanisms to secure your MCP servers:
-1. **OAuth 2.0** - For user-based authentication with external identity providers
-2. **API Key** - For simple pass-through authentication to upstream APIs
+GolfMCP provides three authentication mechanisms to secure your MCP servers:
+1. **JWT Authentication** - Enterprise-grade authentication with JWKS support for production
+2. **Development Authentication** - Simple token-based authentication for development and testing
+3. **API Key Authentication** - Pass-through authentication to upstream APIs
 
-## API key authentication
+Authentication is configured using a dedicated `auth.py` file in your project root, providing clean separation from other build logic.
+
+## JWT Authentication
+
+### Overview
+
+JWT authentication provides enterprise-grade security with JWKS (JSON Web Key Set) support. This is the recommended approach for production environments where you need standards-compliant token validation.
+
+### Configuration
+
+Configure JWT authentication in your project's `auth.py`:
+
+```python
+# auth.py
+from golf.auth import configure_jwt_auth
+
+configure_jwt_auth(
+    jwks_uri_env_var="JWKS_URI",
+    issuer_env_var="JWT_ISSUER", 
+    audience_env_var="JWT_AUDIENCE",
+    required_scopes=["read:user"]
+)
+```
+
+### Environment Variables
+
+Set these environment variables in your `.env` file:
+
+```bash
+JWKS_URI=https://your-provider.com/.well-known/jwks.json
+JWT_ISSUER=https://your-provider.com/
+JWT_AUDIENCE=your-api-audience
+```
+
+### How it Works
+
+1. **Token Validation**: Golf validates JWTs against the JWKS endpoint
+2. **Standards Compliance**: Full RFC 7519 JWT validation
+3. **Scope Verification**: Ensures tokens have required scopes
+4. **Secure Processing**: Battle-tested FastMCP authentication providers
+
+## Development Authentication
+
+### Overview
+
+Development authentication provides a simple token-based system perfect for development and testing environments. You can define custom tokens with specific client IDs and scopes.
+
+### Configuration
+
+Configure development authentication in your project's `auth.py`:
+
+```python
+# auth.py
+from golf.auth import configure_dev_auth
+
+configure_dev_auth(
+    tokens={
+        "dev-token-123": {
+            "client_id": "dev-client",
+            "scopes": ["read", "write"]
+        },
+        "test-token-456": {
+            "client_id": "test-client",
+            "scopes": ["read"]
+        }
+    },
+    required_scopes=["read"]
+)
+```
+
+### Using Development Tokens
+
+Pass tokens via the Authorization header:
+
+```bash
+curl -H "Authorization: Bearer dev-token-123" http://localhost:3000/sse
+```
+
+### Benefits
+
+- **Simple Setup**: No external identity providers required
+- **Flexible Scopes**: Define custom scopes per token
+- **Fast Development**: Immediate authentication without OAuth flows
+- **Testing Friendly**: Easy to create tokens for different test scenarios
+
+## API Key Authentication
 
 ### Overview
 
@@ -15,9 +101,10 @@ Golf provides a simple API key pass-through authentication mechanism that allows
 
 ### Configuration
 
-Configure API key extraction in your project's `pre_build.py`:
+Configure API key extraction in your project's `auth.py`:
 
 ```python
+# auth.py
 from golf.auth import configure_api_key
 
 # Configure which header contains the API key
@@ -34,7 +121,7 @@ configure_api_key(
 3. **Tool Access**: Tools retrieve the API key using `get_api_key()`
 4. **Pass-through**: Tools forward the key to upstream APIs in whatever format they require
 
-### Using in tools
+### Using API Keys in Tools
 
 Tools access the API key with a simple import:
 
@@ -53,11 +140,11 @@ async def my_tool():
     )
 ```
 
-### Complete example: GitHub API tool
+### Complete Example: GitHub API Tool
 
 Here's a complete example of a GitHub tool using API key authentication:
 
-**pre_build.py**:
+**auth.py**:
 ```python
 from golf.auth import configure_api_key
 
@@ -134,11 +221,13 @@ export = list
 
 **X-API-Key Header** (many APIs):
 ```python
+# auth.py
 configure_api_key(header_name="X-API-Key")
 ```
 
 **Authorization with Different Prefixes**:
 ```python
+# auth.py
 # OpenAI style
 configure_api_key(
     header_name="Authorization",
@@ -152,104 +241,84 @@ configure_api_key(
 )
 ```
 
-## OAuth 2.0 authentication
+## Authentication Configuration
 
-GolfMCP provides a high-level abstraction for OAuth 2.0 integration, allowing you to configure authentication without manually implementing the MCP SDK's `OAuthAuthorizationServerProvider` interface.
+### The `auth.py` File
 
-### Core concepts
+Golf v0.2.0 introduces a dedicated `auth.py` file for authentication configuration, providing clean separation and better organization.
 
-*   **`ProviderConfig` (`golf.auth.provider.ProviderConfig`)**:
-    A Pydantic model used to define the settings for an external OAuth 2.0 identity provider (IdP). Key fields include:
-    *   `provider`: A string identifying the provider (e.g., `"github"`, `"google"`, or `"custom"`).
-    *   `client_id_env_var`: The name of the environment variable holding the OAuth Client ID.
-    *   `client_secret_env_var`: The name of the environment variable holding the OAuth Client Secret.
-    *   `jwt_secret_env_var`: The name of the environment variable holding the secret key for signing JWTs issued by your GolfMCP server.
-    *   `authorize_url`: The IdP's authorization endpoint URL.
-    *   `token_url`: The IdP's token endpoint URL.
-    *   `userinfo_url` (Optional): The IdP's userinfo endpoint URL.
-    *   `scopes`: A list of scopes to request from the IdP (e.g., `["read:user", "openid"]`).
-    *   `issuer_url`: The publicly accessible base URL of *your* GolfMCP server. This is crucial as it's used as the `iss` (issuer) claim in JWTs your server generates and for constructing callback URLs.
-    *   `callback_path`: The path on your GolfMCP server where the IdP should redirect after authentication (e.g., `"/auth/callback"`).
-    *   `token_expiration`: The lifetime (in seconds) for JWTs issued by your GolfMCP server.
+```
+my-project/
+├── golf.json
+├── auth.py       # ← Authentication setup
+├── tools/
+└── resources/
+```
 
-*   **`configure_auth` (`golf.auth.configure_auth`)**:
-    A function, typically called in `pre_build.py`, to register the authentication provider configuration with GolfMCP.
-    ```python
-    from golf.auth import ProviderConfig, configure_auth
+### Benefits of `auth.py`
 
-    my_provider_config = ProviderConfig(...)
-    configure_auth(
-        provider_config=my_provider_config,
-        required_scopes=["scope1", "scope2"] # Optional: Global scopes required for any token
-    )
-    ```
-    This function stores the `provider_config` and `required_scopes` globally, which the build process then uses.
+- **Clean Separation**: Authentication logic separate from other build tasks
+- **Better Organization**: Easier to maintain authentication-heavy projects
+- **Improved Clarity**: Clear intent and easier to understand
+- **Enhanced Validation**: Better error messages for authentication setup issues
 
-*   **`GolfOAuthProvider` (`golf.auth.oauth.GolfOAuthProvider`)**:
-    The heart of Golf's auth abstraction. This class implements the MCP SDK's `OAuthAuthorizationServerProvider` interface. It's initialized with the `ProviderConfig` you define.
-    *   **OAuth Flow Management**: It handles the Authorization Code Grant flow:
-        *   Redirecting users to the IdP's `authorize_url`.
-        *   Exchanging the authorization code (received at `callback_path`) for tokens at the IdP's `token_url`.
-        *   Fetching user information (if `userinfo_url` is provided).
-    *   **JWT Issuance**: After successful authentication with the IdP, `GolfOAuthProvider` mints its *own* JWT. This JWT represents the user's session with *your* GolfMCP server.
-        *   The JWT is signed using the `jwt_secret` (loaded from `jwt_secret_env_var`).
-        *   It includes standard claims like `iss` (your server's `issuer_url`), `sub` (subject, often client ID), `exp` (expiration), `iat` (issued at), and `scp` (scopes).
-    *   **Token Storage (`TokenStorage` in `golf.auth.oauth`)**:
-        *   A simple in-memory dictionary-based storage for:
-            *   Authorization codes (temporary).
-            *   Refresh tokens.
-            *   Access tokens (primarily for JWT verification state, though JWTs are self-contained).
-            *   Mappings between your server's access tokens and the IdP's access tokens (e.g., to store the GitHub token).
-        *   **Note:** This in-memory storage is suitable for development and simple use cases. For production, a persistent and more robust token storage solution (e.g., Redis, database) would be necessary. (This is part of the roadmap).
+<Note>
+  **Legacy Support:** Authentication configuration in `pre_build.py` is still supported but deprecated. Use `auth.py` for new projects.
+</Note>
 
-*   **Callback Handling (`create_callback_handler` in `golf.auth.oauth`)**:
-    This function takes a `GolfOAuthProvider` instance and returns an `async` HTTP request handler. The build process uses this to generate the route for your `callback_path` (e.g., `/auth/callback`) in the `dist/server.py`. This handler processes the redirect from the IdP.
+## Golf Utilities Integration
 
-### How secrets are handled
-
-A key design principle is that sensitive secrets (Client ID, Client Secret, JWT Secret) are **not** hardcoded or stored directly in your project files or the built distributable.
-1.  You define *environment variable names* in `ProviderConfig` (e.g., `client_id_env_var="MY_APP_CLIENT_ID"`).
-2.  During the `golf build` process, the `CodeGenerator` (specifically `_generate_server` and the auth-related code in `builder_auth.py`) writes Python code into `dist/server.py`.
-3.  This generated code in `dist/server.py` includes lines like `runtime_client_id = os.environ.get("MY_APP_CLIENT_ID")`.
-4.  When you run `golf run` (or execute `python dist/server.py`), the server, at startup, reads the actual secret values from the environment variables of the system it's running on.
-5.  These runtime-loaded secrets are then used to initialize the `GolfOAuthProvider` instance.
-
-This ensures that your `dist/` directory can be safely distributed or committed (if needed, though typically `dist/` is in `.gitignore`) without exposing secrets. Secrets must be present in the environment where the server runs.
-
-### Accessing provider tokens (e.g., GitHub token)
-
-If your tools need to make API calls to the external provider on behalf of the user (e.g., call the GitHub API), you can retrieve the IdP's access token that GolfMCP stored during the OAuth flow.
+Golf v0.2.0 includes built-in utilities that work seamlessly with the authentication system:
 
 ```python
-# tools/my_github_tool.py
-"""A tool that interacts with the GitHub API."""
-from golf.auth.helpers import get_provider_token # Helper to get the IdP token
-import httpx
-from pydantic import BaseModel # Assuming Output model needs pydantic
+# Available in all tools automatically
+from golf.utils import elicit, sample, get_context
 
-class Output(BaseModel): # Define BaseModel for schema generation
-    # ... define output fields ...
-    data: dict = {} # Example field
-    error: str = None # Example error field
+# Elicitation utilities for user interaction
+response = await elicit("What's your favorite color?")
 
+# Sampling utilities for LLM interactions  
+result = await sample("Explain quantum physics", model="gpt-4")
 
-async def get_my_repos() -> Output:
-    github_token = get_provider_token() # Retrieves the GitHub token for the current user
-
-    if not github_token:
-        return Output(error="User not authenticated with GitHub or token unavailable.")
-
-    headers = {
-        "Authorization": f"Bearer {github_token}",
-        "Accept": "application/vnd.github.v3+json"
-    }
-    async with httpx.AsyncClient() as client:
-        response = await client.get("https://api.github.com/user/repos", headers=headers)
-        if response.status_code == 200:
-            return Output(data=response.json())
-        else:
-            return Output(error=f"GitHub API error: {response.status_code}")
-
-export = get_my_repos
+# Context utilities for accessing FastMCP context
+context = get_context()
 ```
-The `get_provider_token()` function (from `golf.auth.helpers`) looks up the mapping between the current GolfMCP session's access token and the stored external provider's access token. 
+
+These utilities respect the authentication context and provide enhanced telemetry when used with the Golf Platform.
+
+## Choosing the Right Authentication Method
+
+### When to Use Each Method
+
+**JWT Authentication:**
+- Production environments requiring standards-compliant security
+- Integration with existing identity providers (Auth0, Okta, etc.)
+- Applications requiring fine-grained scope validation
+- Enterprise deployments with existing JWKS infrastructure
+
+**Development Authentication:**
+- Local development and testing
+- Simple proof-of-concept projects
+- Internal tools where you control token distribution
+- Scenarios where you need custom scopes and client IDs
+
+**API Key Authentication:**
+- Pass-through to external APIs (GitHub, OpenAI, etc.)
+- Simple authentication requirements
+- When the actual auth happens at the destination service
+- Stateless token forwarding scenarios
+
+### Security Considerations
+
+- **JWT**: Most secure, standards-compliant, supports token expiration and validation
+- **Development**: Simple but should only be used in development/testing
+- **API Key**: Security depends on the upstream service; tokens are passed through as-is
+
+### Configuration Validation
+
+Golf automatically validates your authentication configuration at build time:
+
+- Ensures required environment variables are defined
+- Validates authentication configuration for conflicts
+- Validates authentication method compatibility
+- Provides clear error messages for setup issues 
