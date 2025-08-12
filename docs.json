@@ -28,23 +28,28 @@
             "group": "Core concepts",
             "pages": [
               "golf-mcp-framework/project-structure",
-              "golf-mcp-framework/configuration",
               "golf-mcp-framework/component-specification",
-              "golf-mcp-framework/shared-logic-common-py",
-              "golf-mcp-framework/cli-commands"
+              "golf-mcp-framework/configuration"
+            ]
+          },
+          {
+            "group": "Authentication",
+            "pages": [
+              "golf-mcp-framework/authentication"
             ]
           },
           {
             "group": "Advanced features",
             "pages": [
-              "golf-mcp-framework/pre-build-hook",
-              "golf-mcp-framework/authentication"
+              "golf-mcp-framework/golf-utilities",
+              "golf-mcp-framework/telemetry-monitoring",
+              "golf-mcp-framework/shared-logic-common-py"
             ]
           },
           {
-            "group": "Future",
+            "group": "Reference",
             "pages": [
-              "golf-mcp-framework/roadmap"
+              "golf-mcp-framework/cli-commands"
             ]
           }
         ]
