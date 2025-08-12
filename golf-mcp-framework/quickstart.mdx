@@ -46,19 +46,17 @@ my_awesome_server/
         └── refund.py
 ```
 
-- **`golf.json`**: Configures your server's name, port, transport, etc.
-- **`auth.py`**: Dedicated file for authentication setup (preferred in v0.2.0)
-- **`tools/`**, **`resources/`**, **`prompts/`**: Directories where you'll define your server's capabilities.
+- **`golf.json`**: Configures your server's name, port, transport, etc. (see [Configuration](/golf-mcp-framework/configuration))
+- **`auth.py`**: Dedicated file for authentication setup (see [Authentication](/golf-mcp-framework/authentication))
+- **`tools/`**, **`resources/`**, **`prompts/`**: Directories where you'll define your server's capabilities (see [Component Specification](/golf-mcp-framework/component-specification))
 </Step>
 
 <Step title="Set up authentication">
-The boilerplate example includes a GitHub user tool that requires authentication. Golf v0.2.0 offers three authentication methods:
+The boilerplate example includes a tool that requires authentication. Golf v0.2.0 offers three authentication methods (for complete details, see [Authentication](/golf-mcp-framework/authentication)):
 
 <Tabs>
-<Tab title="API key authentication (Recommended)">
-1. **Create a GitHub Personal Access Token** from your [GitHub settings](https://github.com/settings/tokens)
-
-2. **Configure API key authentication** in `auth.py`:
+<Tab title="API key authentication">
+1. **Configure API key authentication** in `auth.py`:
    ```python
    from golf.auth import configure_api_key
    
