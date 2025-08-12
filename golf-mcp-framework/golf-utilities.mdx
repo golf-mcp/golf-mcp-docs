@@ -11,7 +11,7 @@ Golf utilities provide three core capabilities:
 
 1. **Elicitation** - Interactive user prompting and input collection
 2. **Sampling** - LLM interactions and text generation
-3. **Context Management** - Access to FastMCP context and request information
+3. **Context Management** - Access to context and request information
 
 All utilities respect your authentication configuration and provide automatic telemetry when used with the Golf Platform.
 
@@ -136,7 +136,7 @@ async def creative_writing_tool(prompt: str, style: str):
 
 ## Context Management
 
-Context utilities provide access to FastMCP context, request information, and authentication details.
+Context utilities provide access to context, request information, and authentication details.
 
 ### Basic Context Access
 
@@ -144,7 +144,7 @@ Context utilities provide access to FastMCP context, request information, and au
 from golf.utils import get_context
 
 async def context_aware_tool():
-    # Get the current FastMCP context
+    # Get the current context
     context = get_context()
     
     # Access request information
