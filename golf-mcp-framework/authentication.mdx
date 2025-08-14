@@ -95,15 +95,8 @@ configure_auth(
 Pass tokens via the Authorization header:
 
 ```bash
-curl -H "Authorization: Bearer dev-token-123" http://localhost:3000/sse
+curl -H "Authorization: Bearer dev-token-123" http://localhost:3000/mcp
 ```
-
-### Benefits
-
-- **Simple Setup**: No external identity providers required
-- **Flexible Scopes**: Define custom scopes per token
-- **Fast Development**: Immediate authentication without OAuth flows
-- **Testing Friendly**: Easy to create tokens for different test scenarios
 
 ## OAuth Server Configuration
 
@@ -144,21 +137,6 @@ Configure runtime URL overrides in your `.env` file:
 # .env file
 OAUTH_BASE_URL=https://auth.production.com
 ```
-
-### Features
-
-- **Token Issuance**: Issues JWT tokens to clients
-- **OAuth 2.0 Endpoints**: Authorization, token, and metadata endpoints
-- **Token Revocation**: Supports token revocation (RFC 7009)
-- **Dynamic Client Registration**: Disabled by default for security
-- **Standards Compliance**: Full RFC 6749 OAuth 2.0 implementation
-
-### Security Features
-
-- **HTTPS Enforcement**: Warns/blocks HTTP URLs in production
-- **Scope Validation**: Ensures scopes follow OAuth 2.0 format
-- **Localhost Prevention**: Blocks localhost URLs in production environments
-- **Client Registration Disabled**: Prevents unauthorized client registration
 
 ## Remote Authentication Configuration
 
@@ -217,13 +195,6 @@ configure_api_key(
 )
 ```
 
-### How it works
-
-1. **Middleware**: Golf automatically adds middleware that extracts the API key from incoming request headers
-2. **Context Storage**: The extracted key is stored in a request-scoped context (only exists for the duration of the request)
-3. **Tool Access**: Tools retrieve the API key using `get_api_key()`
-4. **Pass-through**: Tools forward the key to upstream APIs in whatever format they require
-
 ### Using API Keys in Tools
 
 Tools access the API key with a simple import:
@@ -247,8 +218,7 @@ async def my_tool():
 
 ### Overview
 
-Golf v0.2.0 significantly expanded environment variable support across all auth providers, enabling proper 12-factor app configuration patterns for production deployments.
-
+Golf v0.2.0 significantly expanded environment variable support across all auth providers.
 ### JWT Authentication Environment Variables
 
 All JWT fields now support environment variable resolution:
@@ -269,25 +239,6 @@ configure_auth(
     )
 )
 ```
-
-### Environment Variable Examples
-
-```bash
-# .env file for JWT
-JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
-MIIBIjANBgkqhkiG9w0BAQEF..."
-JWKS_URI=https://auth.production.com/.well-known/jwks.json
-JWT_ISSUER=https://auth.production.com/
-# Comma-separated for multiple audiences
-JWT_AUDIENCE=https://api.production.com,https://api2.production.com
-```
-
-### Environment Variable Behavior
-
-- **Runtime Resolution**: Environment variables are resolved when the provider is created, not when configured
-- **Precedence**: Environment variables override static configuration values when present
-- **Comma-Separated Lists**: AUTH_SERVERS and JWT_AUDIENCE support comma-separated values
-- **Security Validation**: Same security rules apply to environment values (HTTPS enforcement, URL validation, etc.)
 
 ### Migration from v0.1.x
 
