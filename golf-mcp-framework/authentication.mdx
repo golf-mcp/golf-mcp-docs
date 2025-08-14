@@ -3,10 +3,12 @@ title: 'Authentication'
 description: 'Implement JWT, development, and API key authentication in your GolfMCP servers.'
 ---
 
-GolfMCP provides three authentication mechanisms to secure your MCP servers:
+GolfMCP provides flexible authentication mechanisms to secure your MCP servers:
 1. **JWT Authentication** - Enterprise-grade authentication with JWKS support for production
 2. **Development Authentication** - Simple token-based authentication for development and testing
-3. **API Key Authentication** - Pass-through authentication to upstream APIs
+3. **OAuth Server** - Full OAuth 2.0 authorization server functionality
+4. **Remote Authentication** - Distributed authentication across multiple resource servers
+5. **API Key Authentication** - Pass-through authentication to upstream APIs
 
 Authentication is configured using a dedicated `auth.py` file in your project root, providing clean separation from other build logic.
 
@@ -22,13 +24,15 @@ Configure JWT authentication in your project's `auth.py`:
 
 ```python
 # auth.py
-from golf.auth import configure_jwt_auth
+from golf.auth import configure_auth, JWTAuthConfig
 
-configure_jwt_auth(
-    jwks_uri_env_var="JWKS_URI",
-    issuer_env_var="JWT_ISSUER", 
-    audience_env_var="JWT_AUDIENCE",
-    required_scopes=["read:user"]
+configure_auth(
+    JWTAuthConfig(
+        jwks_uri_env_var="JWKS_URI",
+        issuer_env_var="JWT_ISSUER", 
+        audience_env_var="JWT_AUDIENCE",
+        required_scopes=["read:user"]
+    )
 )
 ```
 
@@ -40,6 +44,13 @@ Set these environment variables in your `.env` file:
 JWKS_URI=https://your-provider.com/.well-known/jwks.json
 JWT_ISSUER=https://your-provider.com/
 JWT_AUDIENCE=your-api-audience
+
+# Alternative: PEM-encoded public key (instead of JWKS_URI)
+JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEF..."
+
+# Multiple audiences (comma-separated)
+JWT_AUDIENCE=https://api.production.com,https://api2.production.com
 ```
 
 ### How it Works
@@ -60,20 +71,22 @@ Configure development authentication in your project's `auth.py`:
 
 ```python
 # auth.py
-from golf.auth import configure_dev_auth
+from golf.auth import configure_auth, StaticTokenConfig
 
-configure_dev_auth(
-    tokens={
-        "dev-token-123": {
-            "client_id": "dev-client",
-            "scopes": ["read", "write"]
+configure_auth(
+    StaticTokenConfig(
+        tokens={
+            "dev-token-123": {
+                "client_id": "dev-client",
+                "scopes": ["read", "write"]
+            },
+            "test-token-456": {
+                "client_id": "test-client",
+                "scopes": ["read"]
+            }
         },
-        "test-token-456": {
-            "client_id": "test-client",
-            "scopes": ["read"]
-        }
-    },
-    required_scopes=["read"]
+        required_scopes=["read"]
+    )
 )
 ```
 
@@ -91,6 +104,97 @@ curl -H "Authorization: Bearer dev-token-123" http://localhost:3000/sse
 - **Flexible Scopes**: Define custom scopes per token
 - **Fast Development**: Immediate authentication without OAuth flows
 - **Testing Friendly**: Easy to create tokens for different test scenarios
+
+## OAuth Server Configuration
+
+### Overview
+
+Golf v0.2.0 can act as a complete OAuth 2.0 authorization server, not just validate tokens. This mode allows your MCP server to issue JWT tokens to clients and provide full OAuth 2.0 endpoints for authorization, token issuance, and revocation.
+
+### Configuration
+
+Configure OAuth server mode in your project's `auth.py`:
+
+```python
+# auth.py
+from golf.auth import configure_auth, OAuthServerConfig
+
+configure_auth(
+    OAuthServerConfig(
+        base_url="https://auth.example.com",           # Public URL of your server
+        issuer_url="https://auth.example.com",         # OAuth issuer URL  
+        service_documentation_url="https://docs.example.com",  # Optional
+
+        # Scope configuration
+        valid_scopes=["read", "write", "admin"],       # Scopes clients can request
+        default_scopes=["read"],                       # Default scopes for new clients
+        required_scopes=["read"],                      # Scopes required for all requests
+
+        # Environment variable support
+        base_url_env_var="OAUTH_BASE_URL"              # Runtime URL override
+    )
+)
+```
+
+### Environment Variables
+
+Configure runtime URL overrides in your `.env` file:
+
+```bash
+# .env file
+OAUTH_BASE_URL=https://auth.production.com
+```
+
+### Features
+
+- **Token Issuance**: Issues JWT tokens to clients
+- **OAuth 2.0 Endpoints**: Authorization, token, and metadata endpoints
+- **Token Revocation**: Supports token revocation (RFC 7009)
+- **Dynamic Client Registration**: Disabled by default for security
+- **Standards Compliance**: Full RFC 6749 OAuth 2.0 implementation
+
+### Security Features
+
+- **HTTPS Enforcement**: Warns/blocks HTTP URLs in production
+- **Scope Validation**: Ensures scopes follow OAuth 2.0 format
+- **Localhost Prevention**: Blocks localhost URLs in production environments
+- **Client Registration Disabled**: Prevents unauthorized client registration
+
+## Remote Authentication Configuration
+
+### Overview
+
+Remote authentication allows you to distribute authentication across multiple resource servers while maintaining centralized token validation. This is useful for microservices architectures where multiple services need to validate tokens from the same authorization servers.
+
+### Configuration
+
+```python
+# auth.py
+from golf.auth import configure_auth, RemoteAuthConfig, JWTAuthConfig
+
+configure_auth(
+    RemoteAuthConfig(
+        # Static configuration
+        authorization_servers=["https://auth1.example.com"],
+        resource_server_url="https://api.example.com",
+
+        # Environment variable resolution (NEW in v0.2.0)
+        authorization_servers_env_var="AUTH_SERVERS",    # Comma-separated server URLs
+        resource_server_url_env_var="RESOURCE_URL",      # This resource server's URL
+
+        token_verifier_config=JWTAuthConfig(jwks_uri_env_var="JWKS_URI")
+    )
+)
+```
+
+### Environment Variables
+
+```bash
+# .env file for Remote Auth
+AUTH_SERVERS=https://auth1.prod.com,https://auth2.prod.com,https://backup-auth.prod.com
+RESOURCE_URL=https://api.production.com
+JWKS_URI=https://auth1.prod.com/.well-known/jwks.json
+```
 
 ## API Key Authentication
 
@@ -137,4 +241,91 @@ async def my_tool():
         "https://api.example.com/endpoint",
         headers={"Authorization": f"Bearer {api_key}"}
     )
+```
+
+## Enhanced Environment Variable Support
+
+### Overview
+
+Golf v0.2.0 significantly expanded environment variable support across all auth providers, enabling proper 12-factor app configuration patterns for production deployments.
+
+### JWT Authentication Environment Variables
+
+All JWT fields now support environment variable resolution:
+
+```python
+# All JWT fields now support environment variables
+configure_auth(
+    JWTAuthConfig(
+        # Direct values (still supported)
+        jwks_uri="https://auth.example.com/.well-known/jwks.json",
+
+        # Environment variable resolution (preferred for deployment)
+        public_key_env_var="JWT_PUBLIC_KEY",           # PEM-encoded public key
+        jwks_uri_env_var="JWKS_URI",                   # JWKS endpoint URL
+        issuer_env_var="JWT_ISSUER",                   # Expected issuer
+        audience_env_var="JWT_AUDIENCE",               # Expected audience(s)
+        required_scopes=["read:user"]                  # Scopes are part of the config object
+    )
+)
+```
+
+### Environment Variable Examples
+
+```bash
+# .env file for JWT
+JWT_PUBLIC_KEY="-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEF..."
+JWKS_URI=https://auth.production.com/.well-known/jwks.json
+JWT_ISSUER=https://auth.production.com/
+# Comma-separated for multiple audiences
+JWT_AUDIENCE=https://api.production.com,https://api2.production.com
+```
+
+### Environment Variable Behavior
+
+- **Runtime Resolution**: Environment variables are resolved when the provider is created, not when configured
+- **Precedence**: Environment variables override static configuration values when present
+- **Comma-Separated Lists**: AUTH_SERVERS and JWT_AUDIENCE support comma-separated values
+- **Security Validation**: Same security rules apply to environment values (HTTPS enforcement, URL validation, etc.)
+
+### Migration from v0.1.x
+
+Breaking changes from previous versions:
+
+```python
+# ❌ BROKEN - These will cause TypeError in v0.2.0
+configure_jwt_auth(
+    jwks_uri_env_var="JWKS_URI",
+    required_scopes=["read:user"]  # This parameter was removed
+)
+
+configure_dev_auth(
+    tokens={"dev-token": {"client_id": "dev"}},
+    required_scopes=["read"]  # This parameter was removed  
+)
+
+# ✅ CORRECT - v0.2.0 syntax
+from golf.auth import configure_auth, JWTAuthConfig, StaticTokenConfig
+
+# JWT Auth - scopes are part of the config object
+configure_auth(
+    JWTAuthConfig(
+        jwks_uri_env_var="JWKS_URI",
+        required_scopes=["read:user"]  # Scopes are part of the config object
+    )
+)
+
+# Development Auth
+configure_auth(
+    StaticTokenConfig(
+        tokens={
+            "dev-token-123": {
+                "client_id": "dev-client",
+                "scopes": ["read", "write"]
+            }
+        },
+        required_scopes=["read"]  # Scopes are part of the config object
+    )
+)
 ```
