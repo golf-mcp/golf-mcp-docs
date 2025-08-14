@@ -74,27 +74,31 @@ configure_api_key(
 
 ```python
 # auth.py - JWT Authentication
-from golf.auth import configure_jwt_auth
+from golf.auth import configure_auth, JWTAuthConfig
 
-configure_jwt_auth(
-    jwks_uri_env_var="JWKS_URI",
-    issuer_env_var="JWT_ISSUER",
-    audience_env_var="JWT_AUDIENCE",
-    required_scopes=["read:user"]
+configure_auth(
+    JWTAuthConfig(
+        jwks_uri_env_var="JWKS_URI",
+        issuer_env_var="JWT_ISSUER",
+        audience_env_var="JWT_AUDIENCE",
+        required_scopes=["read:user"]
+    )
 )
 ```
 
 ```python
 # auth.py - Development Authentication
-from golf.auth import configure_dev_auth
+from golf.auth import configure_auth, StaticTokenConfig
 
-configure_dev_auth(
-    tokens={
-        "dev-token-123": {
-            "client_id": "dev-client",
-            "scopes": ["read", "write"]
-        }
-    },
-    required_scopes=["read"]
+configure_auth(
+    StaticTokenConfig(
+        tokens={
+            "dev-token-123": {
+                "client_id": "dev-client",
+                "scopes": ["read", "write"]
+            }
+        },
+        required_scopes=["read"]
+    )
 )
 ```
