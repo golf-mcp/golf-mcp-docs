@@ -26,9 +26,8 @@ This will create a new directory named `my_awesome_server` with the following st
 
 ```
 my_awesome_server/
-├── .env                  # Environment variables (e.g., API keys, secrets)
 ├── golf.json             # Main project configuration
-├── pre_build.py          # Optional pre-build script (e.g., for auth setup)
+├── auth.py               # Authentication configuration (new in v0.2.0)
 ├── prompts/              # Directory for prompt components
 │   └── welcome.py
 ├── resources/            # Directory for resource components
@@ -47,43 +46,17 @@ my_awesome_server/
         └── refund.py
 ```
 
-- **`golf.json`**: Configures your server's name, port, transport, etc.
-- **`.env`**: Stores environment-specific variables (automatically created).
-- **`tools/`**, **`resources/`**, **`prompts/`**: Directories where you'll define your server's capabilities.
-- **`pre_build.py`**: An optional script for custom logic before building, often used for authentication setup.
+- **`golf.json`**: Configures your server's name, port, transport, etc. (see [Configuration](/golf-mcp-framework/configuration))
+- **`auth.py`**: Dedicated file for authentication setup (see [Authentication](/golf-mcp-framework/authentication))
+- **`tools/`**, **`resources/`**, **`prompts/`**: Directories where you'll define your server's capabilities (see [Component Specification](/golf-mcp-framework/component-specification))
 </Step>
 
 <Step title="Set up authentication">
-The boilerplate example includes a GitHub user tool that requires authentication. You can choose between two authentication methods:
+The boilerplate example includes a tool that requires authentication. Golf v0.2.0 offers three authentication methods (for complete details, see [Authentication](/golf-mcp-framework/authentication)):
 
 <Tabs>
-<Tab title="OAuth authentication">
-1. **Create a GitHub OAuth App** by following [GitHub's OAuth App creation guide](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app)
-
-2. **Configure the OAuth App URLs (for local testing):**
-   - **Homepage URL:** `http://127.0.0.1:3000`
-   - **Authorization callback URL:** `http://127.0.0.1:3000/auth/callback`
-
-3. **Set up environment variables** in your `.env` file:
-   ```bash
-   GITHUB_CLIENT_ID="your-client-id"
-   GITHUB_CLIENT_SECRET="your-client-secret"
-   JWT_SECRET="example-jwt-secret-for-development-only"
-   ```
-   Replace the values above with your actual GitHub OAuth app credentials.
-
-4. **Access the token in your tools** using:
-   ```python
-   from golf.auth.helpers import get_provider_token
-   
-   token = get_provider_token()
-   ```
-</Tab>
-
 <Tab title="API key authentication">
-1. **Create a GitHub Personal Access Token** from your [GitHub settings](https://github.com/settings/tokens)
-
-2. **Configure API key authentication** in `pre_build.py`:
+1. **Configure API key authentication** in `auth.py`:
    ```python
    from golf.auth import configure_api_key
    
@@ -94,7 +67,7 @@ The boilerplate example includes a GitHub user tool that requires authentication
    )
    ```
 
-3. **Pass the token** when connecting your MCP client (see Step 7 for client configuration)
+3. **Pass the token** when connecting your MCP client
 
 4. **Access the API key in your tools** using:
    ```python
@@ -102,6 +75,60 @@ The boilerplate example includes a GitHub user tool that requires authentication
    
    api_key = get_api_key()
    ```
+</Tab>
+
+<Tab title="Development authentication">
+1. **Configure development tokens** in `auth.py`:
+   ```python
+   from golf.auth import configure_auth, StaticTokenConfig
+   
+   configure_auth(
+       StaticTokenConfig(
+           tokens={
+               "dev-token-123": {
+                   "client_id": "dev-client",
+                   "scopes": ["read", "write"]
+               }
+           },
+           required_scopes=["read"]
+       )
+   )
+   ```
+
+2. **Use the development token** when connecting:
+   ```bash
+   # Pass token via Authorization header
+   Authorization: Bearer dev-token-123
+   ```
+
+3. **No additional setup required** - perfect for development and testing
+</Tab>
+
+<Tab title="JWT authentication (Production)">
+1. **Set up your JWT provider** (Auth0, Okta, etc.)
+
+2. **Configure JWT authentication** in `auth.py`:
+   ```python
+   from golf.auth import configure_auth, JWTAuthConfig
+   
+   configure_auth(
+       JWTAuthConfig(
+           jwks_uri_env_var="JWKS_URI",
+           issuer_env_var="JWT_ISSUER",
+           audience_env_var="JWT_AUDIENCE",
+           required_scopes=["read:user"]
+       )
+   )
+   ```
+
+3. **Set environment variables**:
+   ```bash
+   JWKS_URI=https://your-provider.com/.well-known/jwks.json
+   JWT_ISSUER=https://your-provider.com/
+   JWT_AUDIENCE=your-api-audience
+   ```
+
+4. **Enterprise-grade security** with standards-compliant JWT validation
 </Tab>
 </Tabs>
 </Step>
@@ -142,10 +169,7 @@ async def hello(
 export = hello
 ```
 
-Key points about this tool:
-- **Parameter Annotations**: We use `Annotated` with `Field` to provide descriptions for each parameter. This helps AI agents understand how to use your tool effectively.
-- **Output Model**: The `Output` class defines the structure of the response using Pydantic.
-- **Export**: The `export = hello` line tells Golf which function to expose as the tool.
+For more details on tool structure, parameters, and advanced patterns, see the [Component Specification](/golf-mcp-framework/component-specification).
 </Step>
 
 <Step title="Build for development">
@@ -155,11 +179,7 @@ Compile your project for development:
 golf build dev
 ```
 
-This command:
-- Parses your project files.
-- Transforms them into a FastMCP server structure.
-- Creates a `dist/` directory containing the runnable server (`server.py`) and any necessary supporting files (like auth components).
-- For `dev` builds, it copies your `.env` file to the `dist/` directory, making environment variables available to the server.
+This command builds the actual MCP server.
 </Step>
 
 <Step title="Run your server">
@@ -170,104 +190,5 @@ golf run
 ```
 
 Congratulations! You've built and run your first GolfMCP server.
-</Step>
-
-<Step title="Connect to Claude or Cursor">
-To use your GolfMCP server with client like Claude Desktop, Cursor, Windsurf or any other client we recommend [mcp-remote](https://github.com/geelen/mcp-remote/tree/main) to SSE server.
-
-<Tabs>
-<Tab title="Claude Desktop">
-Edit your Claude Desktop configuration file:
-- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
-
-Add your server configuration:
-```json
-{
-  "mcpServers": {
-    "my-golf-server": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "http://127.0.0.1:3000/sse"
-      ]
-    }
-  }
-}
-```
-
-**With API key authentication:**
-```json
-{
-  "mcpServers": {
-    "my-golf-server": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "http://127.0.0.1:3000/sse",
-        "--header",
-        "Authorization: Bearer ${GITHUB_TOKEN}"
-      ],
-      "env": {
-        "GITHUB_TOKEN": "ghp_your_github_token_here"
-      }
-    }
-  }
-}
-```
-</Tab>
-
-<Tab title="Cursor">
-Edit your Cursor configuration file at `~/.cursor/mcp.json`:
-```json
-{
-  "mcpServers": {
-    "my-golf-server": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "http://127.0.0.1:3000/sse"
-      ]
-    }
-  }
-}
-```
-
-**With API key authentication:**
-```json
-{
-  "mcpServers": {
-    "my-golf-server": {
-      "command": "npx",
-      "args": [
-        "mcp-remote",
-        "http://127.0.0.1:3000/sse",
-        "--header",
-        "Authorization: Bearer ${GITHUB_TOKEN}"
-      ],
-      "env": {
-        "GITHUB_TOKEN": "ghp_your_github_token_here"
-      }
-    }
-  }
-}
-```
-</Tab>
-</Tabs>
-
-<Accordion title="Troubleshooting authentication errors">
-If you encounter authentication errors like:
-```
-Authentication Error
-Token exchange failed: HTTP 400
-```
-
-Clear any locally stored state and tokens:
-```bash
-rm -rf ~/.mcp-auth
-```
-
-Then restart your MCP client and try connecting again.
-</Accordion>
 </Step>
 </Steps> 

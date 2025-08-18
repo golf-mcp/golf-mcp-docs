@@ -1,0 +1,105 @@
+---
+title: 'Telemetry'
+description: 'Enhanced OpenTelemetry integration and monitoring capabilities in Golf v0.2.0.'
+---
+
+Golf v0.2.0 introduces comprehensive telemetry and monitoring capabilities through automatic OpenTelemetry integration, enhanced instrumentation, and seamless Golf Platform connectivity.
+
+## Overview
+
+Golf's telemetry system provides:
+
+- **Automatic OpenTelemetry Integration** - Enabled when `GOLF_API_KEY` is present
+- **Detailed Tracing** - For tools, resources, prompts, and Golf utilities
+- **Input/Output Capture** - Safe serialization of request and response data
+- **Configurable Detail Levels** - Control what gets traced and monitored
+
+## Automatic Golf Platform Integration
+
+### Enabling Telemetry
+
+Telemetry is automatically enabled when you set the `GOLF_API_KEY` environment variable. You can get your Golf API key at [https://app.golf.dev](https://app.golf.dev):
+
+```bash
+# Enable telemetry with Golf Platform
+export GOLF_API_KEY="your-platform-key"
+golf run  # ✅ Telemetry automatically active
+```
+
+What happens automatically with `GOLF_API_KEY`:
+1. **OpenTelemetry enabled** - Sets `opentelemetry_enabled = true` in configuration
+2. **OTLP exporter configured** - Uses `otlp_http` exporter automatically  
+3. **Golf platform endpoint** - Defaults to Golf's telemetry endpoint
+4. **Authentication headers** - Automatically includes Golf API key in telemetry headers
+5. **Service identification** - Uses your project name as the service identifier
+
+You can override these automatic settings if needed:
+
+```json
+// golf.json - Override automatic settings
+{
+  "opentelemetry_enabled": false,  // Disable even with API key
+  "opentelemetry_default_exporter": "console"  // Use different exporter
+}
+```
+
+## OpenTelemetry Configuration
+
+### Basic Configuration
+
+Configure OpenTelemetry in your `golf.json`:
+
+```json
+{
+  "name": "my-project",
+  "opentelemetry_enabled": true,
+  "opentelemetry_default_exporter": "otlp_http"
+}
+```
+
+### Detailed Tracing (Optional)
+
+By default, Golf captures basic telemetry like execution timing, success/failure rates, and error information. You can optionally enable detailed tracing to capture input and output data:
+
+```json
+{
+  "name": "my-project",
+  "opentelemetry_enabled": true,
+  "detailed_tracing": true  // Enable input/output capture
+}
+```
+
+**What detailed tracing captures:**
+
+- **Tool Input/Output** - Function parameters and return values
+- **Resource Content** - Resource parameters and returned data  
+- **Golf Utilities** - Full elicitation prompts/responses and sampling conversations
+- **Request Context** - Complete request metadata and session information
+
+**Security considerations:**
+- Detailed tracing may capture sensitive user data
+- Recommended only for development and testing environments
+- Uses safe serialization with size limits to prevent issues
+- Can be disabled in production while keeping basic telemetry active
+
+```json
+// Production configuration - basic telemetry only
+{
+  "detailed_tracing": false,  // Disable for production
+  "opentelemetry_enabled": true  // Keep basic telemetry active
+}
+```
+
+### Advanced Configuration
+
+For custom telemetry setups, use environment variables:
+
+```bash
+# OTLP HTTP Exporter (recommended)
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318/v1/traces
+OTEL_SERVICE_NAME=my-mcp-server
+OTEL_EXPORTER_OTLP_HEADERS=Authorization=Bearer your-token
+
+# Console Exporter (for debugging)
+OTEL_TRACES_EXPORTER=console
+```

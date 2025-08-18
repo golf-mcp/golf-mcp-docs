@@ -7,9 +7,8 @@ GolfMCP uses a convention-based project structure.
 
 ```
 <project-root>/
-├── .env
 ├── golf.json
-├── pre_build.py
+├── auth.py               # Authentication configuration (v0.2.0)
 ├── prompts/
 │   └── example_prompt.py
 ├── resources/
@@ -27,21 +26,25 @@ GolfMCP uses a convention-based project structure.
 ```
 
 *   **`golf.json`**: The main configuration file (see [Configuration](/golf-mcp-framework/configuration)).
-*   **`.env`**: Stores environment variables. Loaded by the built server.
-*   **`pre_build.py`**: Optional script for pre-build tasks, like auth setup.
-*   **`tools/`**: Contains Python files defining your server's tools (callable functions).
-*   **`resources/`**: Contains Python files defining data resources the LLM can read.
-*   **`prompts/`**: Contains Python files defining reusable prompt templates.
+*   **`auth.py`**: Dedicated authentication configuration file (see [Authentication](/golf-mcp-framework/authentication)).
+*   **`tools/`**: Contains Python files defining your server's tools (see [Component Specification](/golf-mcp-framework/component-specification)).
+*   **`resources/`**: Contains Python files defining data resources the LLM can read (see [Component Specification](/golf-mcp-framework/component-specification)).
+*   **`prompts/`**: Contains Python files defining reusable prompt templates (see [Component Specification](/golf-mcp-framework/component-specification)).
 
-### Component discovery
+<Note>
+  **Deprecated:** Authentication configuration in `pre_build.py` is deprecated. Use the dedicated `auth.py` file instead for cleaner organization and better maintainability.
+</Note>
+
+### Component Discovery
 
 *   Each `.py` file within `tools/`, `resources/`, or `prompts/` (and their subdirectories) is treated as a single component.
 *   Files named `__init__.py` are ignored for direct component definition but are essential for Python's packaging if you structure your components as modules.
-*   Files named `common.py` are special and used for shared code (see `common.py` section).
+*   Files named `common.py` are special and used for shared code (see [Shared Logic documentation](/golf-mcp-framework/shared-logic-common-py)).
+*   The `auth.py` file is treated specially for authentication configuration and is not considered a component.
 
-### Component ID derivation
+### Component ID Derivation
 
-The unique ID for each component (used for registration in FastMCP) is derived from its file path relative to the category directory (`tools`, `resources`, `prompts`).
+The unique ID for each component is derived from its file path relative to the category directory (`tools`, `resources`, `prompts`).
 
 **Examples:**
 
@@ -49,4 +52,53 @@ The unique ID for each component (used for registration in FastMCP) is derived f
 *   `tools/payments/transaction/submit.py` -> ID: `submit-transaction-payments`
 *   `resources/weather/current.py`   -> ID: `current-weather`
 
-ID collisions will result in a build-time error. 
+ID collisions will result in a build-time error.
+
+## Authentication Configuration
+
+### The `auth.py` File (New in v0.2.0)
+
+Golf v0.2.0 introduces a dedicated `auth.py` file for authentication configuration, providing better organization and cleaner separation from other build logic.
+
+**Example `auth.py` configurations** (for full details, see [Authentication](/golf-mcp-framework/authentication)):
+
+```python
+# auth.py - API Key Authentication
+from golf.auth import configure_api_key
+
+configure_api_key(
+    header_name="Authorization",
+    header_prefix="Bearer "
+)
+```
+
+```python
+# auth.py - JWT Authentication
+from golf.auth import configure_auth, JWTAuthConfig
+
+configure_auth(
+    JWTAuthConfig(
+        jwks_uri_env_var="JWKS_URI",
+        issuer_env_var="JWT_ISSUER",
+        audience_env_var="JWT_AUDIENCE",
+        required_scopes=["read:user"]
+    )
+)
+```
+
+```python
+# auth.py - Development Authentication
+from golf.auth import configure_auth, StaticTokenConfig
+
+configure_auth(
+    StaticTokenConfig(
+        tokens={
+            "dev-token-123": {
+                "client_id": "dev-client",
+                "scopes": ["read", "write"]
+            }
+        },
+        required_scopes=["read"]
+    )
+)
+```

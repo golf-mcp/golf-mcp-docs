@@ -1,0 +1,199 @@
+---
+title: 'Golf Utilities'
+description: 'Built-in utilities for elicitation, sampling, and context management in Golf v0.2.0.'
+---
+
+Golf v0.2.0 introduces powerful built-in utilities that enhance your tool development experience. These utilities are automatically available in all tools without additional imports and provide seamless integration with the Golf Platform for enhanced telemetry and monitoring.
+
+## Overview
+
+Golf utilities provide three core capabilities:
+
+1. **Elicitation** - Interactive user prompting and input collection
+2. **Sampling** - LLM interactions and text generation
+3. **Context Management** - Access to context and request information
+
+All utilities respect your authentication configuration and provide automatic telemetry when used with the Golf Platform.
+
+## Elicitation Utilities
+
+Elicitation utilities enable your tools to interact with users, collect additional information, and create dynamic conversational experiences.
+
+### Basic Usage
+
+```python
+from golf.utils import elicit
+
+async def my_interactive_tool():
+    # Simple text prompt
+    color = await elicit("What's your favorite color?")
+    
+    # Use the response in your tool logic
+    return {"message": f"Great choice! {color} is a beautiful color."}
+```
+
+### Advanced Elicitation
+
+```python
+from golf.utils import elicit
+
+async def configuration_tool():
+    # Collect multiple pieces of information
+    name = await elicit("What's your name?")
+    email = await elicit("What's your email address?")
+    preferences = await elicit("Any special preferences? (optional)")
+    
+    # Process and use the collected data
+    config = {
+        "name": name,
+        "email": email,
+        "preferences": preferences or "None specified"
+    }
+    
+    return {"configuration": config}
+```
+
+### Elicitation with Validation
+
+```python
+from golf.utils import elicit
+
+async def age_verification_tool():
+    while True:
+        age_str = await elicit("Please enter your age:")
+        try:
+            age = int(age_str)
+            if age >= 18:
+                break
+            else:
+                await elicit("You must be 18 or older. Please try again.")
+        except ValueError:
+            await elicit("Please enter a valid number.")
+    
+    return {"verified": True, "age": age}
+```
+
+## Sampling Utilities
+
+Sampling utilities provide direct access to LLM capabilities within your tools, enabling text generation, analysis, and AI-powered processing.
+
+### Basic Sampling
+
+```python
+from golf.utils import sample
+
+async def explanation_tool(topic: str):
+    # Generate an explanation using the default model
+    explanation = await sample(f"Explain {topic} in simple terms")
+    
+    return {"topic": topic, "explanation": explanation}
+```
+
+### Model-Specific Sampling
+
+```python
+from golf.utils import sample
+
+async def analysis_tool(text: str):
+    # Use a specific model for analysis
+    sentiment = await sample(
+        f"Analyze the sentiment of this text: '{text}'. Respond with only: positive, negative, or neutral.",
+        model="gpt-4"
+    )
+    
+    summary = await sample(
+        f"Summarize this text in one sentence: '{text}'",
+        model="gpt-3.5-turbo"
+    )
+    
+    return {
+        "original_text": text,
+        "sentiment": sentiment.strip(),
+        "summary": summary
+    }
+```
+
+### Advanced Sampling with Parameters
+
+```python
+from golf.utils import sample
+
+async def creative_writing_tool(prompt: str, style: str):
+    # Advanced sampling with custom parameters
+    story = await sample(
+        f"Write a short story in {style} style based on: {prompt}",
+        model="gpt-4",
+        max_tokens=500,
+        temperature=0.8
+    )
+    
+    return {
+        "prompt": prompt,
+        "style": style,
+        "story": story
+    }
+```
+
+## Context Management
+
+Context utilities provide access to context, request information, and authentication details.
+
+### Basic Context Access
+
+```python
+from golf.utils import get_context
+
+async def context_aware_tool():
+    # Get the current context
+    context = get_context()
+    
+    # Access request information
+    request_id = context.get("request_id")
+    client_info = context.get("client_info")
+    
+    return {
+        "request_id": request_id,
+        "client": client_info
+    }
+```
+
+### Authentication Context
+
+```python
+from golf.utils import get_context
+from golf.auth import get_api_key
+
+async def authenticated_tool():
+    # Get context and auth information
+    context = get_context()
+    api_key = get_api_key()
+    
+    # Use context for logging or customization
+    user_id = context.get("user_id")
+    session_id = context.get("session_id")
+    
+    return {
+        "authenticated": bool(api_key),
+        "user_id": user_id,
+        "session_id": session_id
+    }
+```
+
+### Request Metadata
+
+```python
+from golf.utils import get_context
+
+async def metadata_tool():
+    context = get_context()
+    
+    # Access various metadata
+    metadata = {
+        "timestamp": context.get("timestamp"),
+        "client_version": context.get("client_version"),
+        "transport": context.get("transport"),
+        "headers": context.get("headers", {})
+    }
+    
+    return {"request_metadata": metadata}
+```
