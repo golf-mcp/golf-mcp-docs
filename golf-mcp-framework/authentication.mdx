@@ -214,6 +214,40 @@ async def my_tool():
     )
 ```
 
+## OAuth Proxy Provider
+
+### Overview
+
+Golf now supports OAuth Proxy authentication for integrating with OAuth providers that don't support Dynamic Client Registration (DCR), such as GitHub, Google, and other popular services. The OAuth Proxy acts as an intermediary between your MCP server and upstream OAuth providers.
+
+### Basic Configuration
+
+Configure OAuth Proxy authentication in your project's `auth.py`:
+
+```python
+# auth.py
+from golf.auth import configure_oauth_proxy
+
+configure_oauth_proxy(
+    client_id="your-client-id",
+    client_secret="your-client-secret",
+    upstream_authorization_endpoint="https://domain.com/login/oauth/authorize",
+    upstream_token_endpoint="https://domain.com/login/oauth/access_token",
+    base_url="https://your-server.example.com",
+)
+```
+
+
+### Well-Known Discovery Endpoints
+
+Golf automatically exposes OAuth discovery endpoints when using OAuth providers:
+
+- `/.well-known/oauth-protected-resource` - Advertises authentication requirements
+- `/.well-known/oauth-authorization-server` - OAuth server metadata (for OAuth server provider)
+- OAuth proxy discovery endpoints for client registration
+
+These endpoints help clients discover and interact with your OAuth-enabled MCP server following industry standards.
+
 ## Enhanced Environment Variable Support
 
 ### Overview
