@@ -3,10 +3,13 @@ title: 'Shared logic'
 description: ''
 ---
 
-Often, multiple components within the same category subdirectory (e.g., several tools under `tools/payments/`) might need to share utility functions, client initializations, or Pydantic models. For this, GolfMCP supports `common.py` files.
+<Warning>
+The `common.py` pattern is **deprecated**. Use standard Python module and package structures instead.
+</Warning>
 
-*   A file named `common.py` in any subdirectory of `tools/`, `resources/`, or `prompts/` can contain shared code.
-*   Other component files in the *same directory or its subdirectories* can import from this `common.py` using relative imports.
+Multiple components often need to share utility functions, client initializations, or Pydantic models. GolfMCP supports standard Python repository structures for organizing shared code.
+
+You can create properly named modules, packages, and organize your code using normal Python conventions. The build system will handle imports correctly regardless of your chosen structure.
 
 **Example:**
 
