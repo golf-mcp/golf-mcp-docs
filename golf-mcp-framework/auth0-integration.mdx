@@ -3,25 +3,25 @@ title: "Auth0 Integration"
 description: "OAuth Proxy Configuration and Enterprise Package Setup"
 ---
 
-# OAuth Proxy Configuration Handoff
+## Golf MCP Enterprise - Client Installation Guide
 
-## Prerequisites
+### Installation from Private Repository
 
-### Install Golf MCP Enterprise Package
+Golf MCP Enterprise is available through our private PyPI repository hosted on Gemfury.
 
-The OAuth proxy requires the private `golf-mcp-enterprise` package from our private repository:
+#### Installation Command
 
 ```bash
-# Install from private repository with authentication
---index-url https://${FURY_AUTH}:@pypi.fury.io/golf-mcp/
-
-# Set environment variable with deploy token
-$ FURY_AUTH=TOKEN pip install -r ./requirements.txt
+pip install --extra-index-url https://{TOKEN}@pypi.fury.io/golf-mcp/ golf-mcp-enterprise
 ```
+Access token to the private repository will be shared separately. Please keep the token confidential and treat it as an access token.
 
-Add `golf-mcp-enterprise` to your `requirements.txt`:
-```
-golf-mcp-enterprise>=0.2.1
+#### Example requirements.txt
+```txt
+# Golf MCP Enterprise from private Gemfury repository
+
+--extra-index-url https://62Qi7-Eurq6OhbxCbD4dDTOVah48cvKz8@pypi.fury.io/golf-mcp/
+golf-mcp-enterprise==0.2.2
 ```
 
 ## Golf MCP Framework Integration
@@ -114,25 +114,3 @@ Example: `https://your-proxy.example.com/oauth/callback`
 5. **JWT Verification**: Configure JWKS URI and validation settings
 6. **Test**: Verify OAuth flow works end-to-end
 
----
-
-# Golf MCP Enterprise - Client Installation Guide
-
-## Installation from Private Repository
-
-Golf MCP Enterprise is available through our private PyPI repository hosted on Gemfury.
-
-### Installation Command
-
-```bash
-pip install --extra-index-url https://{TOKEN}@pypi.fury.io/golf-mcp/ golf-mcp-enterprise
-```
-Access token to the private repository will be shared separately. Please keep the token confidential and treat it as an access token.
-
-## Example requirements.txt
-```txt
-# Golf MCP Enterprise from private Gemfury repository
-
---extra-index-url https://62Qi7-Eurq6OhbxCbD4dDTOVah48cvKz8@pypi.fury.io/golf-mcp/
-golf-mcp-enterprise==0.2.2
-```
