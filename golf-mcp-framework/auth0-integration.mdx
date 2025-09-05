@@ -1,0 +1,138 @@
+---
+title: "Auth0 Integration"
+description: "OAuth Proxy Configuration and Enterprise Package Setup"
+---
+
+# OAuth Proxy Configuration Handoff
+
+## Prerequisites
+
+### Install Golf MCP Enterprise Package
+
+The OAuth proxy requires the private `golf-mcp-enterprise` package from our private repository:
+
+```bash
+# Install from private repository with authentication
+--index-url https://${FURY_AUTH}:@pypi.fury.io/golf-mcp/
+
+# Set environment variable with deploy token
+$ FURY_AUTH=TOKEN pip install -r ./requirements.txt
+```
+
+Add `golf-mcp-enterprise` to your `requirements.txt`:
+```
+golf-mcp-enterprise>=0.2.1
+```
+
+## Golf MCP Framework Integration
+
+Add OAuth proxy configuration to your Golf MCP server's `auth.py`:
+
+### Basic Configuration
+```python
+from golf.auth import configure_oauth_proxy, JWTAuthConfig
+
+# Configure OAuth proxy in your auth.py
+configure_oauth_proxy(
+    authorization_endpoint="https://provider.com/oauth/authorize",
+    token_endpoint="https://provider.com/oauth/token", 
+    client_id="your_client_id",
+    client_secret="your_client_secret",
+    base_url="https://your-proxy.example.com",
+    scopes_supported=["read:user", "user:email"],
+    environment="production",
+    token_verifier_config=JWTAuthConfig(
+        jwks_uri="https://provider.com/.well-known/jwks.json",
+        issuer="https://provider.com",
+        audience="your_client_id"
+    )
+)
+```
+
+### Production Configuration with Environment Variables
+```python
+from golf.auth import configure_oauth_proxy, JWTAuthConfig
+import os
+
+# Recommended: use environment variables for secrets
+configure_oauth_proxy(
+    authorization_endpoint=os.getenv("OAUTH_AUTH_ENDPOINT"),
+    token_endpoint=os.getenv("OAUTH_TOKEN_ENDPOINT"),
+    client_id=os.getenv("OAUTH_CLIENT_ID"),
+    client_secret=os.getenv("OAUTH_CLIENT_SECRET"),
+    base_url=os.getenv("PROXY_BASE_URL"),
+    scopes_supported=["read:user", "user:email"],
+    environment=os.getenv("DEPLOYMENT_ENV", "production"),
+    token_verifier_config=JWTAuthConfig(
+        jwks_uri=os.getenv("OAUTH_JWKS_URI"),
+        issuer=os.getenv("OAUTH_ISSUER"),
+        audience=os.getenv("OAUTH_AUDIENCE")
+    )
+)
+```
+
+## Environment Configuration
+
+Set `environment` based on deployment:
+- `"production"` - Production (secure, no debug info)
+- `"development"` - Development (includes debug correlation IDs)
+- `"local"` - Local development
+
+## Required Environment Variables for Production
+
+```bash
+# OAuth Provider Settings
+OAUTH_CLIENT_ID=your_client_id
+OAUTH_CLIENT_SECRET=your_client_secret
+OAUTH_AUTH_ENDPOINT=https://provider.com/oauth/authorize
+OAUTH_TOKEN_ENDPOINT=https://provider.com/oauth/token
+
+# Proxy Settings
+PROXY_BASE_URL=https://your-proxy.example.com
+
+# JWT Verification
+OAUTH_JWKS_URI=https://provider.com/.well-known/jwks.json
+OAUTH_ISSUER=https://provider.com
+OAUTH_AUDIENCE=your_client_id
+```
+
+## Callback URL Setup
+
+The OAuth provider must be configured with this callback URL:
+```
+{base_url}/oauth/callback
+```
+
+Example: `https://your-proxy.example.com/oauth/callback`
+
+## Quick Deployment Checklist
+
+1. **OAuth Provider Setup**: Register application with callback URL
+2. **Environment Variables**: Set all required env vars
+3. **HTTPS**: Ensure base_url uses HTTPS in production
+4. **Scopes**: Configure appropriate scopes for your use case
+5. **JWT Verification**: Configure JWKS URI and validation settings
+6. **Test**: Verify OAuth flow works end-to-end
+
+---
+
+# Golf MCP Enterprise - Client Installation Guide
+
+## Installation from Private Repository
+
+Golf MCP Enterprise is available through our private PyPI repository hosted on Gemfury.
+
+### Installation Command
+
+```bash
+pip install --extra-index-url https://{TOKEN}@pypi.fury.io/golf-mcp/ golf-mcp-enterprise
+```
+Access token to the private repository will be shared separately. Please keep the token confidential and treat it as an access token.
+
+## Example requirements.txt
+```txt
+# Golf MCP Enterprise from private Gemfury repository
+
+--extra-index-url https://62Qi7-Eurq6OhbxCbD4dDTOVah48cvKz8@pypi.fury.io/golf-mcp/
+golf-mcp-enterprise==0.2.2
+```
